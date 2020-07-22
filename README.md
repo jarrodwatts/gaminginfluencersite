@@ -25,7 +25,7 @@ cd with-firebase-authentication
 
 ## Configuration
 
-Set up Firebase:
+Set up Firebase:y
 
 - Create a project at the [Firebase console](https://console.firebase.google.com/).
 - Copy the contents of `.env.local.example` into a new file called `.env.local`
