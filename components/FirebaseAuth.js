@@ -38,8 +38,8 @@ const firebaseAuthConfig = {
         'user_friends'
       ],
       customParameters: {
-        // Forces password re-entry.
-        auth_type: 'reauthenticate'
+        // BELOW: Forces password re-entry.
+        //auth_type: 'reauthenticate'
       }
     },
 
@@ -57,7 +57,7 @@ const firebaseAuthConfig = {
         token: xa,
       }
       cookie.set('auth', userData, {
-        expires: 1,
+        expires: 90, //90 Days
       })
     },
   },
