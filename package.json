@@ -17,6 +17,8 @@
     "react-dom": "^16.13.1",
     "react-firebaseui": "4.1.0",
     "react-hook-form": "^6.0.8",
+    "react-player": "^2.6.0",
+    "react-twitch-embed": "^2.1.0",
     "swr": "0.2.3"
   }
 }

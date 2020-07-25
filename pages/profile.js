@@ -7,18 +7,14 @@ import Container from '@material-ui/core/Container';
 import NavBar from '../components/Header';
 import Paper from '@material-ui/core/Paper';
 import Avatar from '@material-ui/core/Avatar';
-import Box from '@material-ui/core/Box';
-import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import initFirebase from '../utils/auth/initFirebase';
 import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
-import { useForm } from 'react-hook-form';
-import dynamic from 'next/dynamic'
-
-const Footer = dynamic(() => import('../components/Footer'))
+import { useForm } from 'react-hook-form';  
+import { TwitchEmbed } from 'react-twitch-embed';
 
 const useStyles = makeStyles((theme) => ({
 
@@ -41,8 +37,6 @@ const useStyles = makeStyles((theme) => ({
         },
     }
 }));
-
-
 
 export default function Profile() {
     const classes = useStyles();
@@ -99,6 +93,44 @@ export default function Profile() {
         setEditMode(false);
     }
 
+    function renderTwitch() {
+        if (userInformation.socialMediaPlatforms) {
+            if (userInformation.socialMediaPlatforms.twitch) {
+                try {
+                    return (
+                        <Grid item xs={12}>
+                            <Paper className={classes.paper}>
+                                <Grid container direction="row" justify="space-around" alignItems="center">
+                                    <TwitchEmbed
+                                        channel={userInformation.socialMediaPlatforms.twitch}
+                                        id={userInformation.socialMediaPlatforms.twitch}
+                                        theme="dark"
+                                        muted
+                                        onVideoPause={() => console.log(':(')}
+                                    />
+                                    <Typography>
+                                        <b>Twitch:</b> {userInformation.socialMediaPlatforms.twitch}
+                                    </Typography>
+                                </Grid>
+                            </Paper>
+                        </Grid>
+                    )
+                }
+                catch (erorr) {
+                    console.log(error);
+                    return (<div><Typography>Something went wrong</Typography></div>)
+                }
+            }
+
+            else {
+                return (
+                    <div>
+                    </div>)
+            }
+        }
+    }
+
+
     return (
         !editMode ?
             (
@@ -146,51 +178,13 @@ export default function Profile() {
                                         </Grid>
                                     </Grid>
 
-                                    {/* Social Platforms */}
-                                    <Grid container direction="row" spacing={3}>
-                                        <Grid item xs={12}>
-                                            <Paper className={classes.paper}>
-                                                <Box style={{ paddingBottom: '32px' }}><Typography><b>Social Media Platforms</b></Typography></Box>
-
-                                                {/* .map the social platforms  */}
-                                                <Grid container direction="row" spacing={3} justify="space-around" alignItems="center" >
-                                                    <Avatar alt="Remy Sharp" src="/assets/twitch.png" />
-                                                    <Typography>Name</Typography>
-                                                    <Typography>Data 1</Typography>
-                                                    <Typography>Data 2</Typography>
-                                                    <Typography>Data 3</Typography>
-                                                </Grid>
-
-                                                <Divider style={{ marginTop: '16px', marginBottom: '16px' }} />
-
-                                            </Paper>
-                                        </Grid>
-                                    </Grid>
-
-                                    {/* Twitch Embed */}
-                                    <Grid container spacing={3}>
-                                        <Grid item xs={12}>
-                                            <Paper className={classes.paper}>Twitch Embeds?</Paper>
-                                            {/* .map the social platforms  */}
-                                        </Grid>
-                                    </Grid>
-
-                                    {/* Instagram */}
-                                    <Grid container spacing={3}>
-                                        <Grid item xs={12}>
-                                            <Paper className={classes.paper}>Instagram posts?</Paper>
-                                            {/* .map the social platforms  */}
-                                        </Grid>
-                                    </Grid>
-
-                                    {/* etc... */}
+                                    {/* Twitch */}
+                                    {renderTwitch()}
 
                                 </div>
                             </Grid>
                         </Container>
                     </main>
-
-                    <Footer />
 
                 </React.Fragment>
             )

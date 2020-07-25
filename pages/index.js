@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
@@ -10,9 +10,14 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import dynamic from 'next/dynamic'
+import firebase from 'firebase/app'
+import 'firebase/auth'
+import 'firebase/firestore'
+import initFirebase from '../utils/auth/initFirebase';
 
 const Footer = dynamic(() => import('../components/Footer'))
 const NavBar = dynamic(() => import('../components/Header'))
+const OfferCard = dynamic(() => import('../components/OfferCard'))
 
 const useStyles = makeStyles((theme) => ({
   icon: {
@@ -49,12 +54,54 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
-const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-
-export default function Album() {
+export default function Index() {
   const classes = useStyles();
+  const [userInformation, setUserInformation] = useState({})
+  const [offers, setOffers] = useState([])
+
+  //-----Firebase------------//
+  useEffect(() => {
+    initFirebase();
+    let db = firebase.firestore();
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        //now ask for user info
+        let userDoc = db.collection('users').doc(user.uid)
+
+        userDoc.get().then((doc) => {
+          if (doc.exists) {
+            console.log(doc.data())
+            //Infite loop on setting userInformation below
+            setUserInformation(doc.data())
+          }
+        })
+      }
+
+      else {
+        userInformation = {}
+        console.log("Loading")
+      }
+
+      let offersFromDb = [];
+      //Regardless... Get offers from offers collection.
+      let offersCollection = db.collection('offers') //can add WHERE clause here
+        .get()
+        .then((querySnapshot) => {
+          querySnapshot.forEach(function (doc) {
+            // doc.data() is never undefined for query doc snapshots
+            offersFromDb.push(doc.data())
+            console.log(doc.id, " => ", doc.data());
+          });
+          setOffers(offersFromDb);
+        })
+
+    });
+
+  }, [])
+  //-----End Firebase--------//
 
   return (
+    // This is the code that INFLUENCERS WILL SEE.
     <React.Fragment>
       <CssBaseline />
       <NavBar />
@@ -62,33 +109,9 @@ export default function Album() {
 
         <Container className={classes.cardGrid} maxWidth="lg">
           <Grid container spacing={4}>
-            {cards.map((card) => (
+            {offers.map((card) => (
               <Grid item key={card} xs={12} sm={6} md={4}>
-                <Card className={classes.card}>
-                  <CardMedia
-                    className={classes.cardMedia}
-                    image="https://source.unsplash.com/random"
-                    title="Image title"
-                  />
-
-                  <CardContent className={classes.cardContent}>
-                    <Typography gutterBottom variant="h5" component="h2">
-                      Heading
-                    </Typography>
-                    <Typography>
-                      This is a media card. You can use this section to describe the content.
-                    </Typography>
-                  </CardContent>
-
-                  <CardActions>
-                    <Button size="small" color="primary">
-                      View
-                    </Button>
-                    <Button size="small" color="primary">
-                      Edit
-                    </Button>
-                  </CardActions>
-                </Card>
+                <OfferCard />
               </Grid>
             ))}
           </Grid>
