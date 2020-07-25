@@ -19,7 +19,7 @@ const useUser = () => {
         // Sign-out successful.
         cookies.remove('auth')
         setUser()
-        router.push('/auth')
+        router.push('/')
       })
       .catch((e) => {
         console.error(e)
