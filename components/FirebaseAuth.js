@@ -16,7 +16,7 @@ const firebaseAuthConfig = {
   signInOptions: [
     {
       provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-      requireDisplayName: false,
+      requireDisplayName: true,
     },
     {
       provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
@@ -38,13 +38,13 @@ const firebaseAuthConfig = {
         'user_friends'
       ],
       customParameters: {
-        // Forces password re-entry.
-        auth_type: 'reauthenticate'
+        // BELOW: Forces password re-entry.
+        //auth_type: 'reauthenticate'
       }
     },
 
   ],
-  signInSuccessUrl: '/',
+  signInSuccessUrl: '/authTwo',
   credentialHelper: 'none',
   callbacks: {
     signInSuccessWithAuthResult: async ({ user }, redirectUrl) => {
@@ -57,7 +57,7 @@ const firebaseAuthConfig = {
         token: xa,
       }
       cookie.set('auth', userData, {
-        expires: 1,
+        expires: 90, //90 Days
       })
     },
   },
