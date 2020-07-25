@@ -16,7 +16,7 @@ const firebaseAuthConfig = {
   signInOptions: [
     {
       provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-      requireDisplayName: false,
+      requireDisplayName: true,
     },
     {
       provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
@@ -44,7 +44,7 @@ const firebaseAuthConfig = {
     },
 
   ],
-  signInSuccessUrl: '/',
+  signInSuccessUrl: '/authTwo',
   credentialHelper: 'none',
   callbacks: {
     signInSuccessWithAuthResult: async ({ user }, redirectUrl) => {
