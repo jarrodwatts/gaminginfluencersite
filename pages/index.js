@@ -9,8 +9,10 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
-import NavBar from '../components/Header';
-import Footer from '../Components/Footer';
+import dynamic from 'next/dynamic'
+
+const Footer = dynamic(() => import('../Components/Footer'))
+const NavBar = dynamic(() => import('../components/Header'))
 
 const useStyles = makeStyles((theme) => ({
   icon: {
