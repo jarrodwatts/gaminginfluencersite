@@ -11,7 +11,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import dynamic from 'next/dynamic'
 
-const Footer = dynamic(() => import('../Components/Footer'))
+const Footer = dynamic(() => import('../components/Footer'))
 const NavBar = dynamic(() => import('../components/Header'))
 
 const useStyles = makeStyles((theme) => ({
