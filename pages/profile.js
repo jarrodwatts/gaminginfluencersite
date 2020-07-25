@@ -18,7 +18,7 @@ import 'firebase/firestore'
 import { useForm } from 'react-hook-form';
 import dynamic from 'next/dynamic'
 
-const Footer = dynamic(() => import('../Components/Footer'))
+const Footer = dynamic(() => import('../components/Footer'))
 
 const useStyles = makeStyles((theme) => ({
 
