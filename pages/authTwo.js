@@ -30,8 +30,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 async function writeTypeToDatabase(userId, userType) {
-    console.log("userId; ", userId)
-    console.log("userType; ", userType)
     initFirebase();
     let db = firebase.firestore();
     var userDocumentRef = db.collection("users").doc(userId);
