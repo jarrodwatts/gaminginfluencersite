@@ -5,19 +5,20 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import NavBar from '../components/Header';
-import Footer from '../Components/Footer';
 import Paper from '@material-ui/core/Paper';
 import Avatar from '@material-ui/core/Avatar';
 import Box from '@material-ui/core/Box';
 import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-
 import initFirebase from '../utils/auth/initFirebase';
 import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
 import { useForm } from 'react-hook-form';
+import dynamic from 'next/dynamic'
+
+const Footer = dynamic(() => import('../Components/Footer'))
 
 const useStyles = makeStyles((theme) => ({
 
