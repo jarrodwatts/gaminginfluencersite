@@ -1338,6 +1338,13 @@
     react-is "^16.8.0"
     react-transition-group "^4.4.0"
 
+"@material-ui/icons@^4.9.1":
+  version "4.9.1"
+  resolved "https://registry.yarnpkg.com/@material-ui/icons/-/icons-4.9.1.tgz#fdeadf8cb3d89208945b33dbc50c7c616d0bd665"
+  integrity sha512-GBitL3oBWO0hzBhvA9KxqcowRUsA0qzwKkURyC8nppnC3fw54KPKZ+d4V1Eeg/UnDRSzDaI9nGCdel/eh9AQMg==
+  dependencies:
+    "@babel/runtime" "^7.4.4"
+    
 "@material-ui/styles@^4.10.0":
   version "4.10.0"
   resolved "https://registry.yarnpkg.com/@material-ui/styles/-/styles-4.10.0.tgz#2406dc23aa358217aa8cc772e6237bd7f0544071"
@@ -5813,6 +5820,11 @@ react-firebaseui@4.1.0:
   integrity sha512-Y5pAom+W6/R5xZeF4xdvYiP7tObo7GDGWra1Pf2td+FxhtXtGQXQTKdW5Rs4js5zIuN0A3fApZzO+3sa1MHl9Q==
   dependencies:
     firebaseui "^4.1.0"
+
+react-hook-form@^6.0.8:
+  version "6.0.8"
+  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-6.0.8.tgz#29319df417c8ba68ee7ce497426c53a69df07aa5"
+  integrity sha512-lf1TTuRuqHkYJqDtNIgDu9Rk7euKWkFaG2+XZ3FSkngiFWR72Lj96/FeSGF+ZMylCLdCFq2F059kzucVKWvDiQ==
 
 react-is@16.13.1, react-is@^16.7.0, react-is@^16.8.0, react-is@^16.8.1:
   version "16.13.1"
