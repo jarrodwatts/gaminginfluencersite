@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Button from '@material-ui/core/Button';
-import Card from '@material-ui/core/Card';
-import CardActions from '@material-ui/core/CardActions';
-import CardContent from '@material-ui/core/CardContent';
-import CardMedia from '@material-ui/core/CardMedia';
+
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
@@ -36,20 +33,6 @@ const useStyles = makeStyles((theme) => ({
   cardGrid: {
     paddingTop: theme.spacing(8),
     paddingBottom: theme.spacing(8),
-  },
-
-  card: {
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-
-  cardMedia: {
-    paddingTop: '56.25%', // 16:9
-  },
-
-  cardContent: {
-    flexGrow: 1,
   },
 
 }));
@@ -109,13 +92,20 @@ export default function Index() {
 
         <Container className={classes.cardGrid} maxWidth="lg">
           <Grid container spacing={4}>
-            {offers.map((card) => (
-              <Grid item key={card} xs={12} sm={6} md={4}>
-                <OfferCard />
+            {offers.map((offer, key) => (
+              <Grid item key={key} xs={12} sm={6} md={4}>
+                <OfferCard
+                  title={offer.title}
+                  description={offer.description}
+                  creator={offer.creator}
+                  dateCreated={offer.dateCreated}
+                  id={offer.id}
+                />
               </Grid>
             ))}
           </Grid>
         </Container>
+
       </main>
 
       <Footer />
