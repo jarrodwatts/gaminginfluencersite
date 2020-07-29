@@ -8,31 +8,32 @@ import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import SettingsIcon from '@material-ui/icons/Settings';
 import PagesIcon from '@material-ui/icons/Pages';
 import DescriptionIcon from '@material-ui/icons/Description';
+import Router from 'next/router'
 
 export const mainListItems = (
     <div>
-        <ListItem button>
+        <ListItem button onClick={() => {Router.push("/dashboard")}}>
             <ListItemIcon>
                 <DashboardIcon />
             </ListItemIcon>
             <ListItemText primary="Dashboard" />
         </ListItem>
 
-        <ListItem button>
+        <ListItem button onClick={() => {Router.push("/dashboard/offers")}}>
             <ListItemIcon>
                 <PagesIcon />
             </ListItemIcon>
             <ListItemText primary="Offers" />
         </ListItem>
 
-        <ListItem button>
+        <ListItem button onClick={() => {Router.push("/dashboard/influencers")}}>
             <ListItemIcon>
                 <PeopleIcon />
             </ListItemIcon>
             <ListItemText primary="Influencers" />
         </ListItem>
 
-        <ListItem button>
+        <ListItem button onClick={() => {Router.push("/dashboard/contracts")}}>
             <ListItemIcon>
                 <DescriptionIcon />
             </ListItemIcon>
@@ -45,14 +46,14 @@ export const mainListItems = (
 export const secondaryListItems = (
     <div>
         {/* <ListSubheader inset>Manage Your Profile</ListSubheader> */}
-        <ListItem button>
+        <ListItem button onClick={() => {Router.push("/dashboard/profile")}}>
             <ListItemIcon>
                 <AccountCircleIcon />
             </ListItemIcon>
             <ListItemText primary="Profile" />
         </ListItem>
 
-        <ListItem button>
+        <ListItem button onClick={() => {Router.push("/dashboard/settings")}}>
             <ListItemIcon>
                 <SettingsIcon />
             </ListItemIcon>
