@@ -39,7 +39,7 @@ export default function OffersDashboardComponent() {
 
             let offersFromDb = [];
             //Regardless... Get offers from offers collection.
-            let offersCollection = db.collection('offers') //can add WHERE clause here
+            let offersCollection = db.collection('offers').where("creatorId", "==", user.uid)
                 .get()
                 .then((querySnapshot) => {
                     querySnapshot.forEach(function (doc) {

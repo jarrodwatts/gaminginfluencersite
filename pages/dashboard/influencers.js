@@ -154,21 +154,17 @@ export default function Influencers() {
           .get()
           .then((querySnapshot) => {
             querySnapshot.forEach((doc) => {
-              //get each doc's applicants
               offerDocData = doc.data();
-              console.log(offerDocData); //title and id available
 
               thisOfferApplicants = offerDocData["applicants"]
               //add the offer data to the applicant
               thisOfferApplicants.forEach((applicant) => {
                 applicant.offerId = offerDocData.id;
                 applicant.offerTitle = offerDocData.title;
+                users.push(applicant);
               })
-
-              console.log(thisOfferApplicants);
-              users.push(thisOfferApplicants);
             });
-            setApplicants(thisOfferApplicants);
+            setApplicants(users);
           })
           .catch(function (error) {
             console.log("Error getting documents: ", error);
@@ -194,12 +190,69 @@ export default function Influencers() {
     setOpen(false);
   };
 
-  const handleApproveSelect = (influencer, index) => {
+  const handleApproveDenySelect = (influencer, index, type) => {
     console.log("Approve", influencer, "at index:", index)
-  };
 
-  const handleDenySelect = (influencer, index) => {
-    console.log("Deny", influencer, "at index:", index)
+    initFirebase();
+    let db = firebase.firestore();
+    var docRef = db.collection("offers").doc(influencer.offerId);
+
+    docRef.get()
+      .then((doc) => {
+        if (doc.exists) {
+          let offerDoc = doc.data();
+          //get the influencer in the applicants array within this doc
+          let thisInfluencer = offerDoc["applicants"].filter((obj) => { return obj.uid == influencer.uid })[0];
+          thisInfluencer.status = type;
+
+          //add this updated influencer back to the array of applicants
+          offerDoc["applicants"]
+          [thisInfluencer] = thisInfluencer;//index of thisInfluencer = thisInfluencer
+
+          //update db
+          return docRef.update(
+            JSON.parse(JSON.stringify(offerDoc))
+          )
+            .then(() => {
+              console.log("Document successfully updated!");
+            })
+            .then(() => {
+              let users = [];
+              let offerDocData;
+              let thisOfferApplicants;
+              firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                  //re-get data to refresh state i guess
+                  db.collection("offers").where("creatorId", "==", user.uid)
+                    .get()
+                    .then((querySnapshot) => {
+                      querySnapshot.forEach((doc) => {
+                        offerDocData = doc.data();
+                        thisOfferApplicants = offerDocData["applicants"]
+                        //add the offer data to the applicant
+                        thisOfferApplicants.forEach((applicant) => {
+                          applicant.offerId = offerDocData.id;
+                          applicant.offerTitle = offerDocData.title;
+                          users.push(applicant);
+                        })
+                      });
+                      setApplicants(users);
+                      setActiveDisplayItems(users)
+                    })
+                    .catch(function (error) {
+                      console.log("Error getting documents: ", error);
+                    });
+                };
+              })
+            })
+        }
+        else {
+          console.log("No such document!");
+        }
+      })
+      .catch(function (error) {
+        console.log("Error getting document:", error);
+      });
   };
 
   const handleContactSelect = (influencer, index) => {
@@ -207,7 +260,31 @@ export default function Influencers() {
   };
 
   const handleUnsaveSelect = (influencer, index) => {
-    console.log("Unsave", influencer, "at index:", index)
+    console.log(influencer)
+    initFirebase();
+    let db = firebase.firestore();
+
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        let userDoc = db.collection('users').doc(influencer.uid)
+        userDoc.update({
+          savedInfluencers: firebase.firestore.FieldValue.arrayRemove(influencer)
+        })
+          .then(() => {
+            console.log("succesffully unsaved", influencer.uid)
+            //reset state
+            userDoc.get().then((doc) => {
+              if (doc.exists) {
+                let docData = doc.data();
+                setUserInformation(docData);
+                setInfluencers(docData["savedInfluencers"]);
+                setActiveDisplayItems(docData["savedInfluencers"])
+              }
+            })
+          })
+          .catch((error) => console.log("error", error))
+      }
+    })
   };
 
   const handleChange = (event, newValue) => {
@@ -221,6 +298,11 @@ export default function Influencers() {
       setActiveDisplayItems(applicants);
     }
   };
+
+  const capitalize = (s) => {
+    if (typeof s !== 'string') return ''
+    return s.charAt(0).toUpperCase() + s.slice(1)
+  }
 
   console.log(activeDisplayItems);
   return (
@@ -310,8 +392,9 @@ export default function Influencers() {
                         <TableCell><Link color="primary" href={`/influencer/${influencer.uid}`}><Typography>Profile</Typography></Link></TableCell>
                         <TableCell>
                           {selectedTab == "SAVED" ? <Button style={{ marginRight: '16px' }} onClick={() => handleUnsaveSelect(influencer, key)}><FavoriteIcon color="primary" /></Button> : null}
-                          {selectedTab == "APPLICANTS" ? <Button style={{ marginRight: '16px' }} variant="contained" color="primary" onClick={() => handleApproveSelect(influencer, key)}>Approve</Button> : null}
-                          {selectedTab == "APPLICANTS" ? <Button style={{ marginRight: '16px' }} variant="contained" color="secondary" onClick={() => handleDenySelect(influencer, key)}>Deny</Button> : null}
+                          {selectedTab == "APPLICANTS" && (influencer.status != "approved" && influencer.status != "denied") ? <Button style={{ marginRight: '16px' }} variant="contained" color="primary" onClick={() => handleApproveDenySelect(influencer, key, "approved")}>Approve</Button> : null}
+                          {selectedTab == "APPLICANTS" && (influencer.status != "approved" && influencer.status != "denied") ? <Button style={{ marginRight: '16px' }} variant="contained" color="secondary" onClick={() => handleApproveDenySelect(influencer, key, "denied")}>Deny</Button> : null}
+                          {selectedTab == "APPLICANTS" && !(influencer.status != "approved" && influencer.status != "denied") ? <Typography><b>{capitalize(influencer.status)}</b></Typography> : null}
                           <Button variant="outlined" color="secondary" onClick={() => handleContactSelect(influencer, key)}>Contact</Button>
                         </TableCell>
                       </TableRow>
