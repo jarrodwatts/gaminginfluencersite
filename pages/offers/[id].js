@@ -12,14 +12,12 @@ import Avatar from '@material-ui/core/Avatar';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-
 import Divider from '@material-ui/core/Divider';
-
 import initFirebase from '../../utils/auth/initFirebase';
-import Header from '../../components/Header'
-import firebase from 'firebase/app'
-import 'firebase/auth'
-import 'firebase/firestore'
+import Header from '../../components/Header';
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import 'firebase/firestore';
 
 const useStyles = makeStyles((theme) => ({
     root: {

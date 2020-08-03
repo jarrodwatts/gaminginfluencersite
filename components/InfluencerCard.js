@@ -34,7 +34,7 @@ export default function InfluencerCard(props) {
     const classes = useStyles();
     return (
         <Card className={classes.card} >
-            <Link color="inherit" href={`/influencer/${props.uid}`}>
+            <Link color="inherit" href={`/influencers/${props.uid}`}>
                 <CardMedia
                     className={classes.cardMedia}
                     image="https://source.unsplash.com/random"
