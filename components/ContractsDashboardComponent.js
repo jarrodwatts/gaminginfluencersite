@@ -59,7 +59,7 @@ export default function Contracts() {
         })
       }
       else {
-        userInformation = {}
+        setUserInformation({})
         console.log("Loading")
       }
     });

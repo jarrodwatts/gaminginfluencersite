@@ -33,7 +33,7 @@ export default function OffersDashboardComponent() {
             }
 
             else {
-                userInformation = {}
+                setUserInformation({})
                 console.log("Loading")
             }
 

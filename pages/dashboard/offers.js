@@ -132,7 +132,7 @@ export default function Offers() {
       }
 
       else {
-        userInformation = {}
+        setUserInformation({})
         console.log("Loading")
       }
 

@@ -67,7 +67,7 @@ export default function Profile() {
             }
 
             else {
-                userInformation = {}
+                setUserInformation({})
                 console.log("Loading")
             }
         });

@@ -77,7 +77,7 @@ export default function AuthTwo() {
                     <Grid container className={classes.root} spacing={2}>
                         <Grid item xs={12}>
                             <Grid container justify="center" spacing={2} direction="row" alignItems="center">
-                                {["Influencer", "Brand", "Agency"].map((value, key) => (
+                                {["Influencer", "Brand"].map((value, key) => (
                                     <Grid item key={key} >
                                         <Paper className={classes.paper} elevation={3}>
                                             <Grid container direction="column">

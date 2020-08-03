@@ -85,12 +85,11 @@ export default function Index() {
         })
       }
       else {
-        userInformation = { type: "new" }
+        setUserInformation({ type: "new" })
         console.log("Loading")
       }
 
       //If the user is a influencer load offers...
-      console.log("USER TYPE HERE IS: ", user.type);
       //if (user.type !== "Brand") {
       let offersFromDb = [];
       //Regardless... Get offers from offers collection.
@@ -298,7 +297,7 @@ export default function Index() {
           </Container>
         </main>
         <Footer />
-      </React.Fragment >
+      </React.Fragment>
     )
   }
 
