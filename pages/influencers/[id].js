@@ -68,7 +68,7 @@ export default function Profile({ user }) {
                 userDoc.get().then((doc) => {
                     if (doc.exists) {
                         setUserInformation(doc.data())
-                        setIsUserSavedAlready(doc.data()["savedInfluencers"].filter(infl => infl.uid === "778oqKFK0zMjpDOCQ1Yjr9AQ4gS2").length > 0)
+                        setIsUserSavedAlready(doc.data()["savedInfluencers"].filter(infl => infl.uid === user.uid).length > 0)
                     }
                 })
             }
