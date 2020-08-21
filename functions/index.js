@@ -19,19 +19,11 @@ admin.initializeApp(
 exports.createUserDocument = functions.auth.user().onCreate((user) => {
     try {
         console.log("Attempting to create user");
-
-        //Append empty fields to user object
-        let userObject = user;
-        userObject.category = "";
-        userObject.description = "";
-        userObject.detailedSmpInformation = [];
-        userObject.socialMediaPlatforms = [];
-
         return admin
             .firestore()
             .collection('users')
             .doc(user.uid)
-            .set(JSON.parse(JSON.stringify(userObject)));
+            .set(JSON.parse(JSON.stringify(user)));
     }
     catch (error) {
         functions.logger.info("Failed to write user", error), { structuredData: true };
