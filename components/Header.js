@@ -39,7 +39,7 @@ export default function MenuAppBar() {
 
     firebase.auth().onAuthStateChanged(function (user) {
         if (user) {
-            //console.log(user);
+            console.log(user);
             //console.log(user.displayName)
             setUsername(user.displayName.toString());
         } else {
@@ -61,7 +61,7 @@ export default function MenuAppBar() {
                     >
                         <AccountCircle />
                     </IconButton>
-                    
+
                     <Typography variant="h6" className={classes.title}>
                         Site Name
                     </Typography>
@@ -69,7 +69,15 @@ export default function MenuAppBar() {
                     {/* Is User Logged in? Show Profile Icon */}
                     {user ? (
                         <Grid container justify="flex-end" alignItems="center" direction="row">
-
+                            {
+                                <Button
+                                    variant="contained"
+                                    color="secondary"
+                                    onClick={() => { router.push('/create') }}
+                                    style={{ marginRight: '16px' }}>
+                                    Create Offer
+                                    </Button>
+                            }
                             <Typography>{username}</Typography>
                             <IconButton
                                 aria-label="account of current user"
@@ -80,7 +88,6 @@ export default function MenuAppBar() {
                             >
                                 <AccountCircle />
                             </IconButton>
-
                         </Grid>
 
                         //If User is not Logged in Show Login and Sign Up Buttons

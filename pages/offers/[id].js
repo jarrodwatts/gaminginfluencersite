@@ -157,7 +157,7 @@ export default function Offer({ offer }) {
                                     style={{ marginTop: '32px', width: '100%' }}>
                                     {/* Contact Sller Button */}
                                     <Button style={{ width: '100%' }}
-                                        onClick={() => { console.log("Applied") }}
+                                        onClick={() => { console.log("Contacted") }}
                                         variant="outlined"
                                         color="secondary">
                                         Contact {offer.creator}
