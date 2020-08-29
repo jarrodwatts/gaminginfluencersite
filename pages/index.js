@@ -272,7 +272,7 @@ export default function Index() {
                     <MenuItem value={"northAmerica"}>North America</MenuItem>
                     <MenuItem value={"oceania"}>Oceania</MenuItem>
                     <MenuItem value={"southAmerica"}>South America</MenuItem>
-                    <MenuItem value={"other"}>Europe</MenuItem>
+                    <MenuItem value={"other"}>Other</MenuItem>
 
                   </Select>
                 </FormControl>
