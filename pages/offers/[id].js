@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
@@ -13,11 +13,12 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Divider from '@material-ui/core/Divider';
-import initFirebase from '../../utils/auth/initFirebase';
 import Header from '../../components/Header';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
+import 'firebase/storage';
+import initFirebase from '../../utils/auth/initFirebase';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -46,8 +47,26 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Offer({ offer }) {
     const classes = useStyles();
+    const [offerImage, setOfferImage] = React.useState(null)
+
+    //Now get the image
+    if (offer) {
+        initFirebase();
+        let storage = firebase.storage();
+        let pathReference = storage.ref(`offers/${offer.id}.png`);
+
+        pathReference.getDownloadURL()
+            .then((url) => {
+                setOfferImage(url);
+            })
+            .catch((error) => {
+                // Handle any errors
+                console.log(error);
+            });
+    }
 
     console.log(offer)
+    console.log(offerImage);
     return (
         <React.Fragment>
             <CssBaseline />
@@ -66,14 +85,18 @@ export default function Offer({ offer }) {
                                 {/* Author / Brand */}
                                 <Grid container item direction="row" alignItems="center" >
                                     <Typography variant="h6" gutterBottom> Posted by: </Typography>
-                                    <Typography color="secondary" variant="h6" gutterBottom style={{ marginLeft: '8px' }}><b>{offer.creator}</b></Typography>
+                                    <Typography color="secondary" variant="h6" gutterBottom style={{ marginLeft: '8px' }}><b>{offer.creatorName}</b></Typography>
                                 </Grid>
 
                                 {/* Image */}
                                 <Paper className={classes.paper}>
-                                    <img src="https://source.unsplash.com/random"
+                                    <img src={offerImage}
                                         alt="Random Image"
-                                        height="430px"
+                                        style={{
+                                            width: '100%',
+                                            maxHeight: '420px',
+                                            objectFit: "cover", //makes it zoom, not stretch
+                                        }}
                                         onClick={() => { console.log("image clicked") }}
                                     />
                                 </Paper>
@@ -82,16 +105,15 @@ export default function Offer({ offer }) {
 
                                 {/* Relevant Social Platforms */}
                                 <Typography variant="h6" gutterBottom>Relevant Social Platforms</Typography>
-                                <Grid container item direction="row" alignItems="center" justify="center" spacing={2}>
-                                    <Grid item>
-                                        <Avatar alt="Remy Sharp" src="/assets/twitch.png" />
-                                    </Grid>
-                                    <Grid item>
-                                        <Avatar alt="Remy Sharp" src="/assets/instagram.png" />
-                                    </Grid>
-                                    <Grid item>
-                                        <Avatar alt="Remy Sharp" src="/assets/facebook.png" />
-                                    </Grid>
+                                <Grid container item direction="row" alignItems="center" justify="flex-start" spacing={2}>
+                                    {
+                                        Object.entries(offer.socials).map((value, key) => {
+                                            return value[1] ?
+                                                <Grid item key={key}>
+                                                    <Avatar src={`/assets/${value[0]}.png`} />
+                                                </Grid> : null
+                                        })
+                                    }
                                 </Grid>
 
                                 <Divider style={{ marginTop: '16px', marginBottom: '16px' }} />
@@ -106,8 +128,8 @@ export default function Offer({ offer }) {
                             <Grid item xs={4}>
                                 <Paper className={classes.paper}>
                                     {/* Searching for criteria */}
-                                    <Typography variant="h6" gutterBottom>
-                                        {offer.creator} is looking for:
+                                    <Typography variant="h6" color="secondary" gutterBottom>
+                                        {offer.creatorName} is looking for:
                                     </Typography>
 
                                     <div style={{ marginTop: '16px', marginBottom: '16px' }}>
@@ -176,9 +198,9 @@ export default function Offer({ offer }) {
 
 export async function getServerSideProps(context) {
     const id = context.query.id;
-    console.log("id: ", id)
     let offer = null;
-
+    let image = null;
+    global.XMLHttpRequest = require("xhr2");
     //-----Firebase------------//
     //useEffect(() => {
     initFirebase();
@@ -199,10 +221,9 @@ export async function getServerSideProps(context) {
 
     //}, [])
     //-----End Firebase--------//
-    console.log(offer);
     return {
         props: {
-            offer: JSON.parse(JSON.stringify(offer))
+            offer: JSON.parse(JSON.stringify(offer)),
         }
     };
 }

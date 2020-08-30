@@ -320,6 +320,7 @@ export default function Index() {
                     creator={offer.creator}
                     dateCreated={offer.dateCreated}
                     id={offer.id}
+                    image={offer.image}
                   />
                 </Grid>
               ))}

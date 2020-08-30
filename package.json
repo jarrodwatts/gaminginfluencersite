@@ -17,11 +17,14 @@
     "next": "latest",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "react-dropzone": "^11.0.3",
     "react-firebaseui": "4.1.0",
     "react-hook-form": "^6.0.8",
     "react-player": "^2.6.0",
     "react-twitch-embed": "^2.1.0",
     "recharts": "^1.8.5",
-    "swr": "0.2.3"
+    "swr": "0.2.3",
+    "xhr2": "^0.2.0",
+    "xmlhttprequest": "^1.8.0"
   }
 }

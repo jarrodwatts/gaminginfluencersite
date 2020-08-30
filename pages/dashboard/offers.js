@@ -254,7 +254,7 @@ export default function Offers() {
                             </TableCell>
 
                             <TableCell>
-                              <Link color="primary" href={`/offer/${offer.id}`}><Typography>Offer Page</Typography></Link>
+                              <Link color="primary" href={`/offers/${offer.id}`}><Typography>Offer Page</Typography></Link>
                             </TableCell>
 
                             <TableCell>
