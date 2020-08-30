@@ -1,24 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import clsx from 'clsx';
+import React, { useCallback, useMemo, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
-import Badge from '@material-ui/core/Badge';
-import MenuIcon from '@material-ui/icons/Menu';
-import NotificationsIcon from '@material-ui/icons/Notifications';
 import Avatar from '@material-ui/core/Avatar';
 import Header from '../components/Header';
 import Grid from '@material-ui/core/Grid';
-import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 import Container from '@material-ui/core/Container';
 import TextField from '@material-ui/core/TextField';
 import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/router'
 import { Divider } from '@material-ui/core';
+import { useDropzone } from 'react-dropzone';
+import firebase from 'firebase/app'
+import 'firebase/auth'
+import 'firebase/firestore'
+import initFirebase from '../utils/auth/initFirebase';
+import 'firebase/storage';
+import LinearProgress from '@material-ui/core/LinearProgress';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -39,27 +39,176 @@ const useStyles = makeStyles((theme) => ({
 export default function Create() {
     const socials = ["twitch", "youtube", "instagram", "twitter", "facebook",];
     const regions = ["africa", "asia", "europe", "northAmerica", "oceania", "southAmerica", "other"]
+    const [filePreview, setFilePreview] = React.useState(null);
     const classes = useStyles();
-    const { register, handleSubmit, errors } = useForm();
+    const { register, handleSubmit } = useForm();
     const onSubmit = data => saveOffer(data)
+    const [image, setImage] = React.useState(null);
+    const router = useRouter()
+    const [saving, setSaving] = React.useState(false);
+
 
     let [socialToggles, setToggle] = React.useState({
-        twitch: false,
-        youtube: false,
-        instagram: false,
-        twitter: false,
-        facebook: false,
+        twitch: true,
+        youtube: true,
+        instagram: true,
+        twitter: true,
+        facebook: true,
     })
 
     let [regionToggles, setToggleRegion] = React.useState({
-        africa: false,
-        asia: false,
-        europe: false,
-        northAmerica: false,
-        oceania: false,
-        southAmerica: false,
-        other: false
+        africa: true,
+        asia: true,
+        europe: true,
+        northAmerica: true,
+        oceania: true,
+        southAmerica: true,
+        other: true
     })
+
+    //---Start Drag n Drop---\\
+    const baseStyle = {
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '20px',
+        borderWidth: 2,
+        borderRadius: 2,
+        borderColor: '#eeeeee',
+        borderStyle: 'dashed',
+        backgroundColor: '#fafafa',
+        color: '#bdbdbd',
+        outline: 'none',
+        transition: 'border .24s ease-in-out'
+    };
+    const activeStyle = {
+        borderColor: '#2196f3'
+    };
+    const acceptStyle = {
+        borderColor: '#00e676'
+    };
+    const rejectStyle = {
+        borderColor: '#ff1744'
+    };
+
+    function StyledDropzone() {
+
+        const onDrop = useCallback((acceptedFiles) => {
+            acceptedFiles.forEach((file) => {
+                setFilePreview(acceptedFiles.map(file => Object.assign(file, {
+                    preview: URL.createObjectURL(file)
+                })));
+
+                const reader = new FileReader()
+
+                reader.onabort = () => console.log('file reading was aborted')
+                reader.onerror = () => console.log('file reading has failed')
+                reader.onload = () => {
+                    // Do whatever you want with the file contents
+                    const binaryStr = reader.result
+                    console.log(binaryStr)
+                    //Set the var for state for later
+                    setImage(binaryStr);
+                }
+                reader.readAsArrayBuffer(file)
+            })
+
+        }, [])
+
+        const {
+            getRootProps,
+            getInputProps,
+            isDragActive,
+            isDragAccept,
+            isDragReject
+        } = useDropzone({ onDrop, accept: 'image/*' });
+
+        const style = useMemo(() => ({
+            ...baseStyle,
+            ...(isDragActive ? activeStyle : {}),
+            ...(isDragAccept ? acceptStyle : {}),
+            ...(isDragReject ? rejectStyle : {})
+        }), [
+            isDragActive,
+            isDragReject,
+            isDragAccept
+        ]);
+
+        return (
+            <div className="container">
+                <div {...getRootProps({ style })}>
+                    <input {...getInputProps()} />
+                    <Typography>Drag 'n' drop your image here, or click to select a file</Typography>
+                </div>
+            </div>
+        );
+    }
+    //---End Drag n Drop---\\
+
+    const saveOffer = (data) => {
+        console.log("Title", data.title)
+        console.log("Description", data.description)
+        console.log("Socials:", socialToggles)
+        console.log("Regions:", regionToggles)
+        console.log("Image;", image);
+
+        setSaving(true)
+        //firebase upload
+        initFirebase();
+        let db = firebase.firestore();
+        let storage = firebase.storage();
+
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                console.log(user)
+                let storageRef = storage.ref();
+
+                //1. Create a new offer doc with a generated id
+                db.collection("offers").add({
+                    title: data.title,
+                    description: data.description,
+                    socials: socialToggles,
+                    regions: regionToggles,
+                    creatorId: user.uid,
+                    creatorName: user.displayName,
+                    dateCreated: firebase.firestore.FieldValue.serverTimestamp(),
+
+                })
+                    .then((docRef) => {
+                        console.log("Document written with ID: ", docRef.id);
+                        //2. Upload the image to storage, using the generated id name
+                        let file = image
+                        // Create a child reference
+                        let imagesRef = storageRef.child('offers');
+                        // Child references can also take paths delimited by '/'
+                        let offersRef = imagesRef.child(`/${docRef.id}.png`);
+
+                        offersRef.put(file)
+                            .then(() => {
+                                console.log('Uploaded a blob or file!');
+                                //3. On upload success, pass the image name to the offer.
+                                let existingDocRef = db.collection("offers").doc(docRef.id);
+
+                                //Also update the id field
+                                return existingDocRef.update({
+                                    image: `offers/${docRef.id}`,
+                                    id: docRef.id,
+                                }).then(() => console.log("Updated image field"))
+                                    .then(() => router.push(`/offers/${docRef.id}`))
+                            })
+                    })
+
+                    .catch((error) => {
+                        console.error("Error adding document: ", error);
+                    });
+            }
+
+            else {
+                console.log("no user")
+            }
+        })
+    }
 
     return (
         <div className={classes.root}>
@@ -96,7 +245,7 @@ export default function Create() {
                                     </Grid>
                                     <Divider style={{ marginBottom: '8px', marginTop: '32px' }} />
 
-                                    <Grid style={{ paddingTop: '8px',}} container direction="row" alignItems="center" justify="space-between">
+                                    <Grid style={{ paddingTop: '8px', }} container direction="row" alignItems="center" justify="space-between">
                                         <Grid item>
                                             <Typography color="primary"><b>Social Media Platforms: </b></Typography>
                                             <Typography >(Select any desired)</Typography>
@@ -155,6 +304,36 @@ export default function Create() {
                                         </Grid>
                                     </Grid>
 
+                                    <Divider style={{ marginBottom: '8px', marginTop: '24px' }} />
+
+                                    <Grid container direction="row" alignItems="center" justify="space-between">
+                                        <Grid item>
+                                            <Typography color="primary"><b>Image: </b></Typography>
+                                        </Grid>
+
+                                        <Grid item xs={10} >
+                                            {filePreview ?
+                                                <img
+                                                    src={filePreview[0].preview}
+                                                    style={{
+                                                        maxHeight: '200px'
+                                                    }}
+                                                /> :
+                                                <StyledDropzone />
+                                            }
+                                        </Grid>
+                                    </Grid>
+
+                                    <Grid style={{ marginTop: '24px' }} container direction="row" alignItems="center" justify="center">
+                                        <Grid item>
+                                            {!saving ?
+                                                <Button variant="contained" color="secondary" type="submit">Create Offer</Button> :
+                                                <Button variant="contained" type="disabled">Saving...</Button>
+                                            }
+                                            {saving ? <LinearProgress color="primary" /> : null}
+                                        </Grid>
+                                    </Grid>
+
                                 </Paper>
                             </Grid>
 
@@ -167,8 +346,7 @@ export default function Create() {
                     </form>
                 </div>
             </Container>
-
         </div>
-
     );
+
 }

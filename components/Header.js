@@ -39,8 +39,6 @@ export default function MenuAppBar() {
 
     firebase.auth().onAuthStateChanged(function (user) {
         if (user) {
-            console.log(user);
-            //console.log(user.displayName)
             setUsername(user.displayName.toString());
         } else {
             return 'loading'
