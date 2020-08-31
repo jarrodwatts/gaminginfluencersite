@@ -335,7 +335,6 @@ export default function Index() {
   //Loading...
   if (!userInformation.type) {
     return (
-      // This is the code that influencers and new users see
       <React.Fragment>
         <CssBaseline />
         <NavBar />

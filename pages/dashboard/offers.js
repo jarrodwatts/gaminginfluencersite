@@ -29,6 +29,7 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import { convertDate } from '../../utils/helperFunctions/stringFormatting';
 
 const drawerWidth = 240;
 
@@ -162,10 +163,6 @@ export default function Offers() {
   const handleDrawerClose = () => {
     setOpen(false);
   };
-
-  const convertDate = (date) => {
-    return new Date(date * 1000).toLocaleDateString();
-  }
 
   return (
     <div className={classes.root}>

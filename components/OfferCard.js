@@ -1,15 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Link from '@material-ui/core/Link';
-import firebase from 'firebase/app';
-import 'firebase/auth';
-import 'firebase/storage';
 import initFirebase from '../utils/auth/initFirebase';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import getImage from '../utils/helperFunctions/getImage';
 
 const useStyles = makeStyles(() => ({
     card: {
@@ -31,23 +29,18 @@ export default function OfferCard(props) {
     const classes = useStyles();
     const [offerImage, setOfferImage] = React.useState(null)
 
-    if (props.image) {
-        initFirebase();
-        let storage = firebase.storage();
-        let pathReference = storage.ref(`${props.image}.png`);
-
-        pathReference.getDownloadURL()
-            .then((url) => {
-                setOfferImage(url);
-            })
-            .catch((error) => {
-                // Handle any errors
-                console.log(error);
-            });
-    }
+    useEffect(() => {
+        const fetchImage = async () => {
+            const res = await getImage(props.image)
+            setOfferImage(res);
+        }
+        if (props.image) {
+            initFirebase();
+            fetchImage()
+        }
+    }, [props.image])
 
     return (
-
         <Link href={`/offers/${props.id}`}>
             <Card className={classes.card} >
                 {offerImage ? <
