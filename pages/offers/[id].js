@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
@@ -19,6 +19,7 @@ import 'firebase/auth';
 import 'firebase/firestore';
 import 'firebase/storage';
 import initFirebase from '../../utils/auth/initFirebase';
+import getImage from '../../utils/helperFunctions/getImage';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -47,23 +48,18 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Offer({ offer }) {
     const classes = useStyles();
-    const [offerImage, setOfferImage] = React.useState(null)
+    const [offerImage, setOfferImage] = useState(null)
 
-    //Now get the image
-    if (offer) {
-        initFirebase();
-        let storage = firebase.storage();
-        let pathReference = storage.ref(`offers/${offer.id}.png`);
-
-        pathReference.getDownloadURL()
-            .then((url) => {
-                setOfferImage(url);
-            })
-            .catch((error) => {
-                // Handle any errors
-                console.log(error);
-            });
-    }
+    useEffect(() => {
+        const fetchImage = async () => {
+            const res = await getImage(offer.image)
+            setOfferImage(res);
+        }
+        if (offer.image) {
+            initFirebase();
+            fetchImage()
+        }
+    }, [offer.image])
 
     console.log(offer)
     console.log(offerImage);

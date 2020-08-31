@@ -32,6 +32,7 @@ import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
 import initFirebase from '../../utils/auth/initFirebase';
+import { capitalize } from '../../utils/helperFunctions/stringFormatting';
 
 const drawerWidth = 240;
 
@@ -298,11 +299,6 @@ export default function Influencers() {
       setActiveDisplayItems(applicants);
     }
   };
-
-  const capitalize = (s) => {
-    if (typeof s !== 'string') return ''
-    return s.charAt(0).toUpperCase() + s.slice(1)
-  }
 
   console.log(activeDisplayItems);
   return (

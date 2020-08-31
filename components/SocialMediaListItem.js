@@ -4,14 +4,9 @@ import Avatar from '@material-ui/core/Avatar';
 import Grid from '@material-ui/core/Grid';
 import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
-import Link from '@material-ui/core/Link';
+import { capitalize } from '../utils/helperFunctions/stringFormatting';
 
 export default function SocialMediaListItem(props) {
-
-    const capitalize = (s) => {
-        if (typeof s !== 'string') return ''
-        return s.charAt(0).toUpperCase() + s.slice(1)
-    }
 
     return (
         <TableRow>

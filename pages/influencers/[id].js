@@ -20,8 +20,8 @@ import initFirebase from '../../utils/auth/initFirebase';
 import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
-
 import SocialMediaListItem from '../../components/SocialMediaListItem';
+import { capitalize } from '../../utils/helperFunctions/stringFormatting';
 
 const useStyles = makeStyles((theme) => ({
 
@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function Profile({ user }) {
+export default function Profile({ user, }) {
     const classes = useStyles();
     const [userInformation] = useState(user)
     const [firebaseUserInformation, setUserInformation] = useState({})
@@ -68,7 +68,14 @@ export default function Profile({ user }) {
                 userDoc.get().then((doc) => {
                     if (doc.exists) {
                         setUserInformation(doc.data())
-                        setIsUserSavedAlready(doc.data()["savedInfluencers"].filter(infl => infl.uid === user.uid).length > 0)
+
+                        //Try get the savedInfluencers subcollection
+                        let userSavedInfluencerSubcollection = userDoc.collection('savedInfluencers')
+                        userSavedInfluencerSubcollection.get().then((doc) => {
+                            if (doc.exists) {
+                                setIsUserSavedAlready(userSavedInfluencerSubcollection.filter(infl => infl.uid === user.uid).length > 0)
+                            }
+                        })
                     }
                 })
             }
@@ -79,11 +86,6 @@ export default function Profile({ user }) {
         })
     }, [])
     //-----End Firebase--------//
-
-    const capitalize = (s) => {
-        if (typeof s !== 'string') return ''
-        return s.charAt(0).toUpperCase() + s.slice(1)
-    }
 
     const renderPlatform = (key, value) => {
         return (
@@ -262,10 +264,9 @@ export async function getServerSideProps(context) {
         .catch((error) => { console.log("Error getting document:", error); })
     //-----End Firebase--------//
 
-    console.log(user);
     return {
         props: {
-            user: JSON.parse(JSON.stringify(user))
+            user: JSON.parse(JSON.stringify(user)),
         }
     };
 }
