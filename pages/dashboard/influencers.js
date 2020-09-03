@@ -8,7 +8,6 @@ import Toolbar from '@material-ui/core/Toolbar';
 import List from '@material-ui/core/List';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
@@ -122,7 +121,7 @@ export default function Influencers() {
   const [open, setOpen] = React.useState(true);
   const [value, setValue] = React.useState(0);
   const [selectedTab, setSelectedTab] = React.useState("SAVED");
-  const [activeDisplayItems, setActiveDisplayItems] = React.useState([{}])
+  const [activeDisplayItems, setActiveDisplayItems] = React.useState(null)
   const [applicants, setApplicants] = React.useState([])
 
   //-----Firebase------------//
@@ -133,43 +132,47 @@ export default function Influencers() {
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
         let userDoc = db.collection('users').doc(user.uid)
-        userDoc.get().then((doc) => {
-          if (doc.exists) {
-            console.log(doc.data())
-            //Infite loop on setting userInformation below
-            let docData = doc.data();
-            setUserInformation(docData);
-
-            //specifically set influencers too to map it later
-            setInfluencers(docData["savedInfluencers"]);
-            setActiveDisplayItems(docData["savedInfluencers"])
-          }
-        })
+        userDoc.get()
+          .then((doc) => {
+            if (doc.exists) {
+              let docData = doc.data();
+              setUserInformation(docData);
+            }
+          })
+          .then(() => {
+            userDoc.collection('savedInfluencers').get()
+              .then((docsSnapshot) => {
+                const docsDatas = docsSnapshot.docs.map(doc => doc.data())
+                setInfluencers(docsDatas);
+                setActiveDisplayItems(docsDatas)
+              })
+          })
 
         //Now get offers where docs match creatorId == user.uid
         let users = [];
         let offerDocData;
-        let thisOfferApplicants
 
-        db.collection("offers").where("creatorId", "==", user.uid)
+        db.collection('offers').where("creatorId", "==", user.uid)
           .get()
           .then((querySnapshot) => {
-            querySnapshot.forEach((doc) => {
+            querySnapshot.docs.forEach((doc) => {
               offerDocData = doc.data();
 
-              thisOfferApplicants = offerDocData["applicants"]
-              //add the offer data to the applicant
-              thisOfferApplicants.forEach((applicant) => {
-                applicant.offerId = offerDocData.id;
-                applicant.offerTitle = offerDocData.title;
-                users.push(applicant);
-              })
-            });
+              doc.ref.collection('applicants').get()
+                .then((docSnapshot) => {
+                  let applicantData = docSnapshot.docs.map(doc => doc.data())
+                  console.log("ApplicantData:", applicantData);
+                  //Append information to the document
+                  applicantData.forEach((doc) => {
+                    doc.offerId = offerDocData.id,
+                      doc.offerTitle = offerDocData.title
+                  })
+                  applicantData.forEach((doc) => { users.push(doc) })
+                })
+            })
             setApplicants(users);
           })
-          .catch(function (error) {
-            console.log("Error getting documents: ", error);
-          });
+          .catch((err) => { console.log("error getting doc;", err) })
       }
 
       else {
@@ -199,91 +202,54 @@ export default function Influencers() {
     var docRef = db.collection("offers").doc(influencer.offerId);
 
     docRef.get()
-      .then((doc) => {
-        if (doc.exists) {
-          let offerDoc = doc.data();
-          //get the influencer in the applicants array within this doc
-          let thisInfluencer = offerDoc["applicants"].filter((obj) => { return obj.uid == influencer.uid })[0];
-          thisInfluencer.status = type;
+      .then(async (doc) => {
+        let offerDocData = doc.data();
+        let thisInfluencerRef = docRef.collection('applicants').doc(influencer.uid);
+        let users = [];
 
-          //add this updated influencer back to the array of applicants
-          offerDoc["applicants"]
-          [thisInfluencer] = thisInfluencer;//index of thisInfluencer = thisInfluencer
+        //Update the influencer's document with status
+        await thisInfluencerRef.update({
+          status: type
+        })
 
-          //update db
-          return docRef.update(
-            JSON.parse(JSON.stringify(offerDoc))
-          )
-            .then(() => {
-              console.log("Document successfully updated!");
-            })
-            .then(() => {
-              let users = [];
-              let offerDocData;
-              let thisOfferApplicants;
-              firebase.auth().onAuthStateChanged((user) => {
-                if (user) {
-                  //re-get data to refresh state i guess
-                  db.collection("offers").where("creatorId", "==", user.uid)
-                    .get()
-                    .then((querySnapshot) => {
-                      querySnapshot.forEach((doc) => {
-                        offerDocData = doc.data();
-                        thisOfferApplicants = offerDocData["applicants"]
-                        //add the offer data to the applicant
-                        thisOfferApplicants.forEach((applicant) => {
-                          applicant.offerId = offerDocData.id;
-                          applicant.offerTitle = offerDocData.title;
-                          users.push(applicant);
-                        })
-                      });
-                      setApplicants(users);
-                      setActiveDisplayItems(users)
-                    })
-                    .catch(function (error) {
-                      console.log("Error getting documents: ", error);
-                    });
-                };
-              })
-            })
-        }
-        else {
-          console.log("No such document!");
-        }
+        const applicantsRef = await doc.ref.collection('applicants').get();
+        const applicantData = applicantsRef.docs.map(doc => doc.data());
+
+        //Re-Append Offer Title and Id to the influencer
+        applicantData.forEach((applicant) => {
+          applicant.offerId = offerDocData.id,
+            applicant.offerTitle = offerDocData.title
+        })
+
+        applicantData.forEach((applicant) => { users.push(applicant) })
+
+        //Update State once everything's finished
+        setApplicants(users);
+        setActiveDisplayItems(users);
       })
-      .catch(function (error) {
-        console.log("Error getting document:", error);
-      });
   };
 
   const handleContactSelect = (influencer, index) => {
     console.log("Contact", influencer, "at index:", index)
   };
 
-  const handleUnsaveSelect = (influencer, index) => {
+  const handleUnsaveSelect = (influencer) => {
     console.log(influencer)
     initFirebase();
     let db = firebase.firestore();
 
-    firebase.auth().onAuthStateChanged((user) => {
+    firebase.auth().onAuthStateChanged(async (user) => {
       if (user) {
-        let userDoc = db.collection('users').doc(influencer.uid)
-        userDoc.update({
-          savedInfluencers: firebase.firestore.FieldValue.arrayRemove(influencer)
-        })
-          .then(() => {
-            console.log("succesffully unsaved", influencer.uid)
-            //reset state
-            userDoc.get().then((doc) => {
-              if (doc.exists) {
-                let docData = doc.data();
-                setUserInformation(docData);
-                setInfluencers(docData["savedInfluencers"]);
-                setActiveDisplayItems(docData["savedInfluencers"])
-              }
-            })
-          })
-          .catch((error) => console.log("error", error))
+        let userDocRef = db.collection('users').doc(user.uid)
+        await userDocRef.collection('savedInfluencers').doc(influencer.uid).delete();
+        console.log("successfully unsaved", influencer.uid)
+
+        const savedInfluencersRef = await userDocRef.collection('savedInfluencers').get();
+        const savedInfluencersData = savedInfluencersRef.docs.map(doc => doc.data())
+        console.log("savedInfluencersData:", savedInfluencersData)
+
+        setInfluencers(savedInfluencersData);
+        setActiveDisplayItems(savedInfluencersData)
       }
     })
   };
@@ -300,7 +266,6 @@ export default function Influencers() {
     }
   };
 
-  console.log(activeDisplayItems);
   return (
     <div className={classes.root}>
       <CssBaseline />
@@ -380,7 +345,7 @@ export default function Influencers() {
 
                   <TableBody>
 
-                    {activeDisplayItems.map((influencer, key) => (
+                    {activeDisplayItems?.map((influencer, key) => (
                       <TableRow key={key} justify="center">
                         <TableCell><Avatar alt="Remy Sharp" src={influencer.photoURL} /></TableCell>
                         <TableCell><Typography>{influencer.displayName}</Typography></TableCell>

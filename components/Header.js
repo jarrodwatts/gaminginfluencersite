@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -7,9 +7,9 @@ import IconButton from '@material-ui/core/IconButton';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-
 import { useUser } from '../utils/auth/useUser'
 import { useRouter } from 'next/router'
+import getUser from '../utils/auth/getUser';
 import initFirebase from '../utils/auth/initFirebase';
 import firebase from 'firebase/app'
 import 'firebase/auth'
@@ -26,24 +26,23 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-
-
 export default function MenuAppBar() {
     const classes = useStyles();
     const [anchorEl] = React.useState(null);
     const [username, setUsername] = useState(null);
+    const [userDetails, setUserDetails] = useState(null);
     const { user } = useUser()
     const router = useRouter()
 
-    initFirebase();
+    useEffect(() => {
+        firebase.auth().onAuthStateChanged(async (user) => {
+            initFirebase();
+            const res = await getUser(user);
+            setUserDetails(res);
+            setUsername(res.displayName)
 
-    firebase.auth().onAuthStateChanged(function (user) {
-        if (user) {
-            setUsername(user.displayName.toString());
-        } else {
-            return 'loading'
-        }
-    });
+        });
+    }, []);
 
     return (
         <div className={classes.root}>
@@ -61,13 +60,13 @@ export default function MenuAppBar() {
                     </IconButton>
 
                     <Typography variant="h6" className={classes.title}>
-                        Site Name
+                        gamingInfluencerSite
                     </Typography>
 
                     {/* Is User Logged in? Show Profile Icon */}
                     {user ? (
                         <Grid container justify="flex-end" alignItems="center" direction="row">
-                            {
+                            {userDetails?.type == "Brand" ?
                                 <Button
                                     variant="contained"
                                     color="secondary"
@@ -75,7 +74,7 @@ export default function MenuAppBar() {
                                     style={{ marginRight: '16px' }}>
                                     Create Offer
                                     </Button>
-                            }
+                                : null}
                             <Typography>{username}</Typography>
                             <IconButton
                                 aria-label="account of current user"

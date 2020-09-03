@@ -15,6 +15,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import dynamic from 'next/dynamic'
 import firebase from 'firebase/app'
+import getUser from '../utils/auth/getUser';
 import 'firebase/auth'
 import 'firebase/firestore'
 import initFirebase from '../utils/auth/initFirebase';
@@ -57,40 +58,25 @@ export default function Index() {
   const classes = useStyles();
   const [userInformation, setUserInformation] = useState({})
   const [offers, setOffers] = useState([])
-  const [open, setOpen] = React.useState(false);
-  const [influencers, setInfluencers] = React.useState([])
-  const [staticInfluencers, writeToStaticInfluencers] = React.useState()
-  const [filters, setFilters] = React.useState([])
+  const [open, setOpen] = useState(false);
+  const [influencers, setInfluencers] = useState([])
+  const [staticInfluencers, writeToStaticInfluencers] = useState()
+  const [filters, setFilters] = useState([])
 
   //Filters...
-  const [gender, setGender] = React.useState('');
-  const [platform, setPlatform] = React.useState('');
-  const [region, setRegion] = React.useState('');
+  const [gender, setGender] = useState('');
+  const [platform, setPlatform] = useState('');
+  const [region, setRegion] = useState('');
 
   //-----Firebase------------//
   useEffect(() => {
-    initFirebase();
-    let db = firebase.firestore();
-    firebase.auth().onAuthStateChanged((user) => {
-      if (user) {
-        //now ask for user info
-        let userDoc = db.collection('users').doc(user.uid)
+    firebase.auth().onAuthStateChanged(async (user) => {
+      initFirebase();
+      const res = await getUser(user);
+      setUserInformation(res);
 
-        userDoc.get().then((doc) => {
-          if (doc.exists) {
-            console.log(doc.data())
-            //Infite loop on setting userInformation below
-            setUserInformation(doc.data())
-          }
-        })
-      }
-      else {
-        setUserInformation({ type: "new" })
-        console.log("Loading")
-      }
+      let db = firebase.firestore();
 
-      //If the user is a influencer load offers...
-      //if (user.type !== "Brand") {
       let offersFromDb = [];
       //Regardless... Get offers from offers collection.
       let offersCollection = db.collection('offers') //can add WHERE clause here
@@ -99,7 +85,6 @@ export default function Index() {
           querySnapshot.forEach(function (doc) {
             // doc.data() is never undefined for query doc snapshots
             offersFromDb.push(doc.data())
-            console.log(doc.id, " => ", doc.data());
           });
           setOffers(offersFromDb);
         })
@@ -113,7 +98,6 @@ export default function Index() {
         .then((querySnapshot) => {
           querySnapshot.forEach((doc) => {
             influencersFromDb.push(doc.data())
-            console.log("Influencer read:", doc.id, " => ", doc.data());
           });
           setInfluencers(influencersFromDb);
           writeToStaticInfluencers(influencersFromDb);
@@ -132,7 +116,6 @@ export default function Index() {
       filtered = staticInfluencers.filter(influencer => influencer.gender == event.target.value);
     }
     else {
-      console.log("reverting gender selection")
       setGender('')
       filtered = staticInfluencers.filter(influencer => influencer)
     }
@@ -153,16 +136,12 @@ export default function Index() {
       filtered = staticInfluencers.filter(influencer => influencer.socialMediaPlatforms.hasOwnProperty(event.target.value));
     }
     else {
-      console.log("reverting platform selection")
       setPlatform('')
       filtered = staticInfluencers.filter(influencer => influencer)
     }
 
     if (gender != '') {
-      console.log("gender is", gender)
-      console.log("filtered is currently...", filtered);
       filtered = filtered.filter(influencer => influencer.gender == gender);
-      console.log("now filtered is...", filtered)
     }
     if (region != '') {
       filtered = filtered.filter(influencer => influencer.region == region);
@@ -177,7 +156,6 @@ export default function Index() {
       filtered = staticInfluencers.filter(influencer => influencer.region == event.target.value);
     }
     else {
-      console.log("reverting region selection")
       setRegion('')
       filtered = staticInfluencers.filter(influencer => influencer)
     }
@@ -192,7 +170,6 @@ export default function Index() {
 
   //Brands...
   if (userInformation.type == "Brand") {
-    console.log(influencers)
     return (
       // This is the code that BRANDS will see.
       <React.Fragment>
@@ -316,11 +293,12 @@ export default function Index() {
                 <Grid item key={key} xs={12} sm={6} md={4}>
                   <OfferCard
                     title={offer.title}
-                    description={offer.description}
+                    description={offer.shortDescription}
                     creator={offer.creator}
                     dateCreated={offer.dateCreated}
                     id={offer.id}
                     image={offer.image}
+                    criteria={offer.criteria}
                   />
                 </Grid>
               ))}

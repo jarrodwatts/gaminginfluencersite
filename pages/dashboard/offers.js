@@ -226,7 +226,7 @@ export default function Offers() {
                     <Grid item xs={3}>
                       <OfferCardAnalyticsRow
                         title={offer.title}
-                        description={offer.description}
+                        description={offer.shortDescription}
                         creator={offer.creator}
                         dateCreated={offer.dateCreated}
                         id={offer.id}

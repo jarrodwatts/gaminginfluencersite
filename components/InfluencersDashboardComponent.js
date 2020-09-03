@@ -34,21 +34,17 @@ export default function InfluencersDashboardComponent() {
         initFirebase();
         let db = firebase.firestore();
 
-        firebase.auth().onAuthStateChanged((user) => {
+        firebase.auth().onAuthStateChanged(async (user) => {
             if (user) {
-                let userDoc = db.collection('users').doc(user.uid)
-                userDoc.get().then((doc) => {
-                    if (doc.exists) {
-                        console.log(doc.data())
-                        //Infite loop on setting userInformation below
-                        let docData = doc.data();
-                        setUserInformation(docData);
+                const userDocRef = db.collection('users').doc(user.uid);
+                const userDocData = await userDocRef.get();
+                setUserInformation(userDocData.data());
 
-                        //specifically set influencers too to map it later
-
-                        setInfluencers(docData["savedInfluencers"]);
-                    }
-                })
+                //specifically set influencers too to map it later
+                const savedInfluencers = await userDocRef.collection('savedInfluencers').get();
+                const savedInfluencersData = savedInfluencers.docs.map(doc => doc.data())
+                console.log(savedInfluencersData);
+                setInfluencers(savedInfluencersData);
             }
             else {
                 setUserInformation({})
@@ -75,7 +71,7 @@ export default function InfluencersDashboardComponent() {
                 </TableHead>
 
                 <TableBody>
-                    {influencers.map((influencer, key) => (
+                    {influencers?.map((influencer, key) => (
                         <TableRow key={key}>
                             <TableCell><Avatar alt="Remy Sharp" src={influencer.photoURL} /></TableCell>
                             <TableCell><Typography>{influencer.displayName}</Typography></TableCell>

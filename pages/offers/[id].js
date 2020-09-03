@@ -20,6 +20,7 @@ import 'firebase/firestore';
 import 'firebase/storage';
 import initFirebase from '../../utils/auth/initFirebase';
 import getImage from '../../utils/helperFunctions/getImage';
+import { convertDate } from '../../utils/helperFunctions/stringFormatting';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -83,6 +84,7 @@ export default function Offer({ offer }) {
                                     <Typography variant="h6" gutterBottom> Posted by: </Typography>
                                     <Typography color="secondary" variant="h6" gutterBottom style={{ marginLeft: '8px' }}><b>{offer.creatorName}</b></Typography>
                                 </Grid>
+                                <Typography gutterBottom> <b>Posted at:</b> {convertDate(offer.dateCreated.seconds)} </Typography>
 
                                 {/* Image */}
                                 <Paper className={classes.paper}>
@@ -91,7 +93,8 @@ export default function Offer({ offer }) {
                                         style={{
                                             width: '100%',
                                             maxHeight: '420px',
-                                            objectFit: "cover", //makes it zoom, not stretch
+                                            objectFit: "cover",
+                                            marginTop: '16px', //makes it zoom, not stretch
                                         }}
                                         onClick={() => { console.log("image clicked") }}
                                     />
@@ -128,35 +131,26 @@ export default function Offer({ offer }) {
                                         {offer.creatorName} is looking for:
                                     </Typography>
 
-                                    <div style={{ marginTop: '16px', marginBottom: '16px' }}>
+                                    {/* <div style={{ marginTop: '16px', marginBottom: '16px' }}>
                                         <Typography>
                                             We're looking for gamers who play competitive games like poo poo
                                         </Typography>
-                                    </div>
+                                    </div> */}
 
-                                    <Divider />
+                                    <Divider style={{ marginTop: '8px', marginBottom: '8px' }} />
 
                                     <div className={classes.list}>
                                         <List component="nav" aria-label="main mailbox folders">
-                                            <ListItem button>
-                                                <ListItemIcon >
-                                                    <DoneIcon color="secondary" />
-                                                </ListItemIcon>
-                                                <ListItemText primary="Streamers" />
-                                            </ListItem>
-                                            <ListItem button>
-                                                <ListItemIcon>
-                                                    <DoneIcon color="secondary" />
-                                                </ListItemIcon>
-                                                <ListItemText primary="Women" />
-                                            </ListItem>
-                                            <ListItem button>
-                                                <ListItemIcon>
-                                                    <DoneIcon color="secondary" />
-                                                </ListItemIcon>
-                                                <ListItemText primary="1000+ Twitch Followers" />
-                                            </ListItem>
-
+                                            {
+                                                offer.criteria.map((item, key) =>
+                                                    <ListItem button key={key}>
+                                                        <ListItemIcon >
+                                                            <DoneIcon color="secondary" />
+                                                        </ListItemIcon>
+                                                        <ListItemText primary={item} />
+                                                    </ListItem>
+                                                )
+                                            }
                                         </List>
 
                                     </div>

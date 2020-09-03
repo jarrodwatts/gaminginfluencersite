@@ -1,10 +1,11 @@
-import React, { useCallback, useMemo, useEffect } from 'react';
+import React, { useCallback, useMemo, useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Typography from '@material-ui/core/Typography';
 import Avatar from '@material-ui/core/Avatar';
 import Header from '../components/Header';
 import Grid from '@material-ui/core/Grid';
+import Chip from '@material-ui/core/Chip';
 import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 import Container from '@material-ui/core/Container';
@@ -19,6 +20,8 @@ import 'firebase/firestore'
 import initFirebase from '../utils/auth/initFirebase';
 import 'firebase/storage';
 import LinearProgress from '@material-ui/core/LinearProgress';
+import { regions, socials } from '../utils/helperFunctions/constants';
+import { displayRegion } from '../utils/helperFunctions/stringFormatting';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -37,18 +40,18 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function Create() {
-    const socials = ["twitch", "youtube", "instagram", "twitter", "facebook",];
-    const regions = ["africa", "asia", "europe", "northAmerica", "oceania", "southAmerica", "other"]
-    const [filePreview, setFilePreview] = React.useState(null);
+    const [value, setValue] = useState("");
+    const [criteria, setCriteria] = useState([])
+    const [filePreview, setFilePreview] = useState(null);
     const classes = useStyles();
     const { register, handleSubmit } = useForm();
     const onSubmit = data => saveOffer(data)
-    const [image, setImage] = React.useState(null);
+    const [image, setImage] = useState(null);
     const router = useRouter()
-    const [saving, setSaving] = React.useState(false);
+    const [saving, setSaving] = useState(false);
 
 
-    let [socialToggles, setToggle] = React.useState({
+    let [socialToggles, setToggle] = useState({
         twitch: true,
         youtube: true,
         instagram: true,
@@ -56,7 +59,7 @@ export default function Create() {
         facebook: true,
     })
 
-    let [regionToggles, setToggleRegion] = React.useState({
+    let [regionToggles, setToggleRegion] = useState({
         africa: true,
         asia: true,
         europe: true,
@@ -152,6 +155,8 @@ export default function Create() {
         console.log("Socials:", socialToggles)
         console.log("Regions:", regionToggles)
         console.log("Image;", image);
+        console.log("Criteria:,", criteria);
+        console.log("shortDesc;", data.shortDescription)
 
         setSaving(true)
         //firebase upload
@@ -173,6 +178,8 @@ export default function Create() {
                     creatorId: user.uid,
                     creatorName: user.displayName,
                     dateCreated: firebase.firestore.FieldValue.serverTimestamp(),
+                    criteria: criteria,
+                    shortDescription: data.shortDescription,
 
                 })
                     .then((docRef) => {
@@ -210,6 +217,21 @@ export default function Create() {
         })
     }
 
+    const handleDelete = (key) => {
+        setCriteria(criteria.filter(item => item !== criteria[key]))
+    };
+
+    const handleChange = (event) => {
+        setValue(event.target.value);
+    };
+
+    const addCriteria = () => {
+        if (criteria.length < 4 && !criteria.includes(value)) {
+            setCriteria([...criteria, value])
+            setValue("");
+        }
+    }
+
     return (
         <div className={classes.root}>
             <CssBaseline />
@@ -228,7 +250,9 @@ export default function Create() {
                                             <Typography color="primary"><b>Title: </b></Typography>
                                         </Grid>
                                         <Grid item xs={8}>
-                                            <TextField style={{ width: '100%' }} type="text" label="Offer Title" name="title" inputRef={register} />
+                                            <TextField style={{ width: '100%' }} type="text" label="Offer Title" name="title" inputRef={register} inputProps={{
+                                                maxLength: 80
+                                            }} />
                                         </Grid>
                                     </Grid>
 
@@ -236,11 +260,33 @@ export default function Create() {
 
                                     <Grid container direction="row" alignItems="center" justify="space-between">
                                         <Grid item>
-                                            <Typography color="primary"><b>Description: </b></Typography>
+                                            <Typography color="primary"><b>Short Description: </b></Typography>
                                         </Grid>
 
                                         <Grid item xs={8}>
-                                            <TextField style={{ width: '100%' }} type="text" multiline label="Offer Description" name="description" inputRef={register} />
+                                            <TextField
+                                                style={{ width: '100%' }}
+                                                type="text"
+                                                multiline
+                                                label="Short, One-Sentence Offer Description"
+                                                name="shortDescription"
+                                                inputRef={register}
+                                                inputProps={{
+                                                    maxLength: 140
+                                                }}
+                                            />
+                                        </Grid>
+                                    </Grid>
+
+                                    <Divider style={{ marginBottom: '8px', marginTop: '16px' }} />
+
+                                    <Grid container direction="row" alignItems="center" justify="space-between">
+                                        <Grid item>
+                                            <Typography color="primary"><b>Detailed Description: </b></Typography>
+                                        </Grid>
+
+                                        <Grid item xs={8}>
+                                            <TextField style={{ width: '100%' }} type="text" multiline label="Detailed Offer Description" name="description" inputRef={register} />
                                         </Grid>
                                     </Grid>
                                     <Divider style={{ marginBottom: '8px', marginTop: '32px' }} />
@@ -295,7 +341,7 @@ export default function Create() {
                                                                 style={regionToggles[item] ? { backgroundColor: "#556cd6" } : { filter: 'invert(80%)' }}
                                                             />
                                                             <Typography variant="button">
-                                                                {item}
+                                                                {displayRegion(item)}
                                                             </Typography>
                                                         </Grid>
                                                     </Button>
@@ -321,6 +367,29 @@ export default function Create() {
                                                 /> :
                                                 <StyledDropzone />
                                             }
+                                        </Grid>
+                                    </Grid>
+
+                                    <Divider style={{ marginBottom: '16px', marginTop: '24px' }} />
+
+                                    <Grid container direction="row" alignItems="center" justify="space-between">
+                                        <Grid item>
+                                            <Typography color="primary"><b>Looking For: </b></Typography>
+                                            <Typography >(Four short criteria)</Typography>
+                                        </Grid>
+
+                                        <Grid item xs={8} >
+                                            <Grid container direction="row" alignItems="center" justify="flex-start" spacing={2}>
+                                                <TextField style={{ width: '80%' }} type="text" onChange={event => handleChange(event)} value={value} label="Criteria (E.g. 100 Twitch Followers)" name="criteria" inputRef={register} />
+                                                <Button variant="contained" color="primary" onClick={addCriteria}> Add</Button>
+
+                                                {criteria.map((word, key) =>
+                                                    <Grid item key={key}>
+                                                        <Chip label={word} onDelete={() => { handleDelete(key) }} color="primary" />
+                                                    </Grid>
+                                                )}
+
+                                            </Grid>
                                         </Grid>
                                     </Grid>
 
