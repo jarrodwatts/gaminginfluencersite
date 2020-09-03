@@ -19,8 +19,8 @@ export default async function getUser(user) {
                 })
         }
         else {
-            console.log("No user found");
-            reject("No user found");
+            console.log("No user found, or user is logged out");
+            resolve(null);
         }
 
     })

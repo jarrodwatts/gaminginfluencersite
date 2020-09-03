@@ -169,7 +169,7 @@ export default function Index() {
   };
 
   //Brands...
-  if (userInformation.type == "Brand") {
+  if (userInformation?.type == "Brand") {
     return (
       // This is the code that BRANDS will see.
       <React.Fragment>
@@ -279,7 +279,7 @@ export default function Index() {
   }
 
   //Influencers and new users...
-  if (userInformation.type !== "Brand") {
+  else {
     return (
       // This is the code that influencers and new users see
       <React.Fragment>
@@ -308,19 +308,5 @@ export default function Index() {
         <Footer />
       </React.Fragment>
     );
-  }
-
-  //Loading...
-  if (!userInformation.type) {
-    return (
-      <React.Fragment>
-        <CssBaseline />
-        <NavBar />
-        <main>
-          <Typography variant="h4">Loading...</Typography>
-        </main>
-        <Footer />
-      </React.Fragment>
-    )
   }
 }
