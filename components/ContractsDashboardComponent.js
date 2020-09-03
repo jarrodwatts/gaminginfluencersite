@@ -88,7 +88,7 @@ export default function Contracts() {
         </TableHead>
 
         <TableBody>
-          {contracts.map((contract, key) => (
+          {contracts?.map((contract, key) => (
             <TableRow key={key}>
               <TableCell>
                 <Avatar alt="Remy Sharp" src={contract.creator ? contract.creator.photoURL : null} className={classes.avatarBottom} />

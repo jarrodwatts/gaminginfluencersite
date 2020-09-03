@@ -58,30 +58,33 @@ export default function Profile({ user, }) {
 
     //-----Firebase------------//
     useEffect(() => {
+        console.log("user:", user)
         initFirebase();
         let db = firebase.firestore();
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
+        firebase.auth().onAuthStateChanged((userLoggedIn) => {
+            //this "user" (userLoggedIn) is the user currently logged in.
+            //NOT the "user" we use for the "influencer" (or brand in future) we're looking at.
+            if (userLoggedIn) {
                 //now ask for user info
-                let userDoc = db.collection('users').doc(user.uid)
+                let userDoc = db.collection('users').doc(userLoggedIn.uid);
 
-                userDoc.get().then((doc) => {
+                userDoc.get().then(async (doc) => {
                     if (doc.exists) {
                         setUserInformation(doc.data())
+                        console.log("user:", user)
 
                         //Try get the savedInfluencers subcollection
-                        let userSavedInfluencerSubcollection = userDoc.collection('savedInfluencers')
-                        userSavedInfluencerSubcollection.get().then((doc) => {
-                            if (doc.exists) {
-                                setIsUserSavedAlready(userSavedInfluencerSubcollection.filter(infl => infl.uid === user.uid).length > 0)
-                            }
-                        })
+                        const savedInfluencersRef = await doc.ref.collection('savedInfluencers').get();
+                        const savedInfluencersData = savedInfluencersRef.docs.map(doc => doc.data());
+
+                        console.log("Savedinfluencerdata:", savedInfluencersData)
+                        setIsUserSavedAlready(savedInfluencersData.filter(infl => infl.uid === user.uid).length > 0);
+
                     }
                 })
             }
             else {
                 setUserInformation = { type: "new" }
-                console.log("Loading")
             }
         })
     }, [])
@@ -116,26 +119,25 @@ export default function Profile({ user, }) {
     const handleSaveClick = () => {
         setIsUserSavedAlready(!isUserSavedAlready)
         console.log(isUserSavedAlready)
-        console.log(firebaseUserInformation.uid) //us
+        console.log(firebaseUserInformation.uid) //(the brand)
         console.log(user.uid) //the influencer we want to save
 
         //handle firebase code
         initFirebase();
         let db = firebase.firestore();
         let userDoc = db.collection('users').doc(firebaseUserInformation.uid)
+        let savedInfluencersSubcollection = userDoc.collection('savedInfluencers');
 
         if (!isUserSavedAlready) { //We're saving them
-            userDoc.update({
-                savedInfluencers: firebase.firestore.FieldValue.arrayUnion(user)
-            })
+            savedInfluencersSubcollection.doc(user.uid).set(
+                JSON.parse(JSON.stringify(user))
+            )
                 .then(() => console.log("Success"))
                 .catch((error) => console.log("Error", error))
         }
 
         else { //We're removing them
-            userDoc.update({
-                savedInfluencers: firebase.firestore.FieldValue.arrayRemove(user)
-            })
+            savedInfluencersSubcollection.doc(user.uid).delete()
                 .then(() => console.log("Success"))
                 .catch((error) => console.log("Error", error))
         }
@@ -230,7 +232,6 @@ export default function Profile({ user, }) {
 
                                             : null //end check of generic
                                         }
-
 
                                     </Paper>
                                 </Grid>

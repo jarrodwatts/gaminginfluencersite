@@ -32,6 +32,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function InfluencerCard(props) {
     const classes = useStyles();
+    console.log("socials", props.socialMediaPlatforms);
     return (
         <Card className={classes.card} >
             <Link color="inherit" href={`/influencers/${props.uid}`}>
@@ -57,14 +58,14 @@ export default function InfluencerCard(props) {
             </Link>
 
             <CardActions>
-                {props.socialMediaPlatforms ?
-                    Object.keys(props.socialMediaPlatforms).map((platform, key) =>
-                        <React.Fragment key={key}>
-                            <Button onClick={() => { document.location.href = `${props.socialMediaPlatforms[platform]}` }}>
-                                <Avatar src={`/assets/${platform}.png`} className={classes.small} alt={platform} />
-                            </Button>
-                        </React.Fragment>
-                    ) : null
+                {
+                    Object.entries(props.socialMediaPlatforms).map(([platformName, platformValue], key) =>
+
+                        platformValue ?
+                            <Button key={key}>
+                                <Avatar src={`/assets/${platformName}.png`} className={classes.small} alt={platformName} />
+                            </Button> : null
+                    )
                 }
             </CardActions>
         </Card>

@@ -65,10 +65,11 @@ export default function OffersDashboardComponent() {
                         <Grid item key={key} xs={12} sm={6} md={4}>
                             <OfferCard
                                 title={offer.title}
-                                description={offer.description}
+                                description={offer.shortDescription}
                                 creator={offer.creator}
                                 dateCreated={offer.dateCreated}
                                 id={offer.id}
+                                image={offer.image}
                             />
                         </Grid>
                     ))}

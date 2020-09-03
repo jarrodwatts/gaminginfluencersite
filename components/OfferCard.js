@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
+import Grid from '@material-ui/core/Grid';
+import Chip from '@material-ui/core/Chip';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Link from '@material-ui/core/Link';
@@ -39,6 +41,7 @@ export default function OfferCard(props) {
             fetchImage()
         }
     }, [props.image])
+    console.log(props);
 
     return (
         <Link href={`/offers/${props.id}`}>
@@ -57,6 +60,15 @@ export default function OfferCard(props) {
                     <Typography>
                         {props.description}
                     </Typography>
+                    <Grid alignItems="center" justify="flex-start" container direction="row" spacing={1} style={{ marginTop: '8px' }}>
+                        {
+                            props.criteria?.map((criteria, key) =>
+                                <Grid item key={key}>
+                                    <Chip label={criteria} color="primary" />
+                                </Grid>
+                            )
+                        }
+                    </Grid>
                 </CardContent>
             </Card>
         </Link>
