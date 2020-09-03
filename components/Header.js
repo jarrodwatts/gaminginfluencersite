@@ -7,6 +7,8 @@ import IconButton from '@material-ui/core/IconButton';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
 import { useUser } from '../utils/auth/useUser'
 import { useRouter } from 'next/router'
 import getUser from '../utils/auth/getUser';
@@ -26,23 +28,32 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+
 export default function MenuAppBar() {
     const classes = useStyles();
-    const [anchorEl] = React.useState(null);
     const [username, setUsername] = useState(null);
     const [userDetails, setUserDetails] = useState(null);
-    const { user } = useUser()
+    const { user, logout } = useUser()
     const router = useRouter()
+    const [anchorEl, setAnchorEl] = useState(null);
 
     useEffect(() => {
         firebase.auth().onAuthStateChanged(async (user) => {
             initFirebase();
             const res = await getUser(user);
             setUserDetails(res);
-            setUsername(res.displayName)
+            setUsername(res?.displayName)
 
         });
     }, []);
+
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
 
     return (
         <div className={classes.root}>
@@ -76,19 +87,31 @@ export default function MenuAppBar() {
                                     </Button>
                                 : null}
                             <Typography>{username}</Typography>
+
                             <IconButton
                                 aria-label="account of current user"
-                                aria-controls="menu-appbar"
+                                aria-controls="simple-menu"
                                 aria-haspopup="true"
-                                onClick={() => { router.push('/profile') }}
+                                onClick={handleClick}
                                 color="inherit"
                             >
                                 <AccountCircle />
                             </IconButton>
+
+                            <Menu
+                                id="simple-menu"
+                                anchorEl={anchorEl}
+                                keepMounted
+                                open={Boolean(anchorEl)}
+                                onClose={handleClose}
+                            >
+                                <MenuItem onClick={() => router.push('/profile')}>Profile</MenuItem>
+                                <MenuItem onClick={() => logout()}>Logout</MenuItem>
+                            </Menu>
                         </Grid>
 
-                        //If User is not Logged in Show Login and Sign Up Buttons
                     ) :
+                        //If User is not Logged in Show Login and Sign Up Buttons
                         <div>
                             <Button
                                 style={{ marginRight: '16px' }}
