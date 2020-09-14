@@ -94,22 +94,22 @@ export default function Profile() {
     }
 
     function renderTwitch() {
-        if (userInformation.socialMediaPlatforms) {
-            if (userInformation.socialMediaPlatforms.twitch) {
+        if (userInformation?.socialMediaPlatforms) {
+            if (userInformation.socialMediaPlatforms?.twitch) {
                 try {
                     return (
                         <Grid item xs={12}>
                             <Paper className={classes.paper}>
                                 <Grid container direction="row" justify="space-around" alignItems="center">
                                     <TwitchEmbed
-                                        channel={userInformation.socialMediaPlatforms.twitch}
-                                        id={userInformation.socialMediaPlatforms.twitch}
+                                        channel={userInformation?.socialMediaPlatforms.twitch}
+                                        id={userInformation?.socialMediaPlatforms.twitch}
                                         theme="dark"
                                         muted
                                         onVideoPause={() => console.log(':(')}
                                     />
                                     <Typography>
-                                        <b>Twitch:</b> {userInformation.socialMediaPlatforms.twitch}
+                                        <b>Twitch:</b> {userInformation?.socialMediaPlatforms.twitch}
                                     </Typography>
                                 </Grid>
                             </Paper>
@@ -209,19 +209,19 @@ export default function Profile() {
                                 {/* Social Media Platforms */}
                                 <Typography color="primary" variant="h5" gutterBottom>Social Media Links</Typography>
                                 <Grid item >
-                                    <TextField type="text" label="Twitch Username" name="socialMediaPlatforms.twitch" defaultValue={userInformation.socialMediaPlatforms.twitch ? userInformation.socialMediaPlatforms.twitch : null} inputRef={register} />
-                                    <TextField type="text" label="YouTube Username" name="socialMediaPlatforms.youtube" defaultValue={userInformation.socialMediaPlatforms.youtube ? userInformation.socialMediaPlatforms.youtube : null} inputRef={register} />
+                                    <TextField type="text" label="Twitch Username" name="socialMediaPlatforms.twitch" defaultValue={userInformation?.socialMediaPlatforms?.twitch ? userInformation?.socialMediaPlatforms?.twitch : null} inputRef={register} />
+                                    <TextField type="text" label="YouTube Username" name="socialMediaPlatforms.youtube" defaultValue={userInformation?.socialMediaPlatforms?.youtube ? userInformation?.socialMediaPlatforms?.youtube : null} inputRef={register} />
                                 </Grid>
                                 <Grid item>
-                                    <TextField type="text" label="Twitter Username" name="socialMediaPlatforms.twitter" defaultValue={userInformation.socialMediaPlatforms.twitter ? userInformation.socialMediaPlatforms.twitter : null} inputRef={register} />
-                                    <TextField type="text" label="Facebook Username" name="socialMediaPlatforms.facebook" defaultValue={userInformation.socialMediaPlatforms.facebook ? userInformation.socialMediaPlatforms.facebook : null} inputRef={register} />
+                                    <TextField type="text" label="Twitter Username" name="socialMediaPlatforms.twitter" defaultValue={userInformation?.socialMediaPlatforms?.twitter ? userInformation?.socialMediaPlatforms?.twitter : null} inputRef={register} />
+                                    <TextField type="text" label="Facebook Username" name="socialMediaPlatforms.facebook" defaultValue={userInformation?.socialMediaPlatforms?.facebook ? userInformation?.socialMediaPlatforms?.facebook : null} inputRef={register} />
                                 </Grid>
                                 <Grid item>
-                                    <TextField type="text" label="Instagram Username" name="socialMediaPlatforms.instagram" defaultValue={userInformation.socialMediaPlatforms.instagram ? userInformation.socialMediaPlatforms.instagram : null} inputRef={register} />
-                                    <TextField type="url" label="Blog Url" name="socialMediaPlatforms.blog" defaultValue={userInformation.socialMediaPlatforms.blog ? userInformation.socialMediaPlatforms.blog : null} inputRef={register} />
+                                    <TextField type="text" label="Instagram Username" name="socialMediaPlatforms.instagram" defaultValue={userInformation?.socialMediaPlatforms?.instagram ? userInformation?.socialMediaPlatforms?.instagram : null} inputRef={register} />
+                                    <TextField type="url" label="Blog Url" name="socialMediaPlatforms.blog" defaultValue={userInformation?.socialMediaPlatforms?.blog ? userInformation?.socialMediaPlatforms?.blog : null} inputRef={register} />
                                 </Grid>
                                 <Grid item style={{ marginBottom: '32px' }}>
-                                    <TextField type="text" label="TikTok Username" name="socialMediaPlatforms.tiktok" defaultValue={userInformation.socialMediaPlatforms.tiktok ? userInformation.socialMediaPlatforms.tiktok : null} inputRef={register} />
+                                    <TextField type="text" label="TikTok Username" name="socialMediaPlatforms.tiktok" defaultValue={userInformation?.socialMediaPlatforms?.tiktok ? userInformation?.socialMediaPlatforms?.tiktok : null} inputRef={register} />
                                 </Grid>
 
                                 <Grid item container direction="row" spacing={3} justify="center" alignItems="center">
