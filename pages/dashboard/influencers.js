@@ -350,7 +350,7 @@ export default function Influencers() {
                         <TableCell><Avatar alt="Remy Sharp" src={influencer.photoURL} /></TableCell>
                         <TableCell><Typography>{influencer.displayName}</Typography></TableCell>
                         {selectedTab == "APPLICANTS" ? <TableCell><Typography>{influencer.offerTitle}</Typography></TableCell> : null}
-                        <TableCell><Link color="primary" href={`/influencers/${influencer.uid}`}><Typography>Profile</Typography></Link></TableCell>
+                        <TableCell><Link color="primary" href={`/profile/${influencer.uid}`}><Typography>Profile</Typography></Link></TableCell>
                         <TableCell>
                           {selectedTab == "SAVED" ? <Button style={{ marginRight: '16px' }} onClick={() => handleUnsaveSelect(influencer, key)}><FavoriteIcon color="primary" /></Button> : null}
                           {selectedTab == "APPLICANTS" && (influencer.status != "approved" && influencer.status != "denied") ? <Button style={{ marginRight: '16px' }} variant="contained" color="primary" onClick={() => handleApproveDenySelect(influencer, key, "approved")}>Approve</Button> : null}
