@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
@@ -18,7 +18,7 @@ import 'firebase/auth'
 import 'firebase/firestore'
 import { useRouter } from 'next/router'
 import { useForm } from 'react-hook-form';
-import Router from 'next/router'
+import getUser from '../utils/auth/getUser';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -38,7 +38,7 @@ export default function AuthTwo() {
     const classes = useStyles();
     const [username, setUsername] = useState(null);
     const [user, setUser] = useState(null);
-    const [stage, setStage] = useState(1);
+    const [stage, setStage] = useState("Loading");
     const [region, setRegion] = React.useState('');
     const [gender, setGender] = React.useState('');
 
@@ -52,17 +52,22 @@ export default function AuthTwo() {
     if (errors.length > 0) { console.log(errors); }
 
     const socials = ["twitch", "youtube", "instagram", "twitter", "facebook", "medium"];
-
-    //Get current user and set username
     initFirebase();
-    firebase.auth().onAuthStateChanged(function (user) {
-        if (user) {
-            setUsername(user.displayName.toString());
-            setUser(user);
-        } else {
-            return 'loading'
-        }
-    });
+
+    useEffect(() => {
+        firebase.auth().onAuthStateChanged(async (user) => {
+            const res = await getUser(user);
+            setUser(res);
+            console.log(res)
+            if (res?.type) {
+                console.log(res.type)
+                router.push('/profile');
+            }
+            else {
+                setStage(1)
+            }
+        });
+    }, []);
 
     async function writeTypeToDatabase(userId, userType) {
         initFirebase();
@@ -151,7 +156,7 @@ export default function AuthTwo() {
                         <Container className={classes.cardGrid} maxWidth="lg">
 
                             <Typography variant="h3" gutterBottom>
-                                <b>{username}</b>, what best describes you?
+                                What best describes you?
                             </Typography>
 
                             <Grid container className={classes.root} spacing={2}>
@@ -221,7 +226,7 @@ export default function AuthTwo() {
                                                         <MenuItem value={"male"}>Male</MenuItem>
                                                         <MenuItem value={"female"}>Female</MenuItem>
                                                         <MenuItem value={"other"}>Other</MenuItem>
-                                                        
+
                                                     </Select>
                                                 </Grid>
                                             </Grid>
@@ -264,7 +269,7 @@ export default function AuthTwo() {
                             </Grid>
                         </Container>
                     </main>
-                </React.Fragment >
+                </React.Fragment>
             )
 
         case 3:
@@ -307,6 +312,13 @@ export default function AuthTwo() {
                             </Grid>
                         </Container>
                     </main>
+                </React.Fragment>
+            )
+        case "Loading":
+            // TODO: Put a loading screen in here 
+            return (
+                <React.Fragment>
+                    <CssBaseline />
                 </React.Fragment>
             )
     }
