@@ -35,7 +35,7 @@ export default function InfluencerCard(props) {
     console.log("socials", props.socialMediaPlatforms);
     return (
         <Card className={classes.card} >
-            <Link color="inherit" href={`/influencers/${props.uid}`}>
+            <Link color="inherit" href={`/profile/${props.uid}`}>
                 <CardMedia
                     className={classes.cardMedia}
                     image="https://source.unsplash.com/random"

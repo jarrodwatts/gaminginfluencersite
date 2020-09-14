@@ -19,7 +19,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { mainListItems, secondaryListItems } from '../../components/listItems';
-import OfferCardAnalyticsRow from '../../components/OfferCardAnalyticsRow';
+import OfferCard from '../../components/OfferCard';
 import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
@@ -160,9 +160,33 @@ export default function Offers() {
   const handleDrawerOpen = () => {
     setOpen(true);
   };
+
   const handleDrawerClose = () => {
     setOpen(false);
   };
+
+  const deleteOffer = (offerId) => {
+    initFirebase();
+    let db = firebase.firestore();
+    console.log(offerId)
+    db.collection("offers").doc(offerId).delete()
+      .then(() => {
+        console.log("Document successfully deleted!");
+        //Re-Get Offers from db
+        let offersFromDb = [];
+        db.collection('offers').where("creatorId", "==", userInformation.uid)
+          .get()
+          .then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+              offersFromDb.push(doc.data())
+            });
+            setOffers(offersFromDb);
+          })
+      })
+      .catch((error) => {
+        console.error("Error removing document: ", error);
+      });
+  }
 
   return (
     <div className={classes.root}>
@@ -224,12 +248,13 @@ export default function Offers() {
                 <Paper style={{ marginBottom: '24px' }}>
                   <Grid container alignItems="center" justify="space-between" spacing={2}>
                     <Grid item xs={3}>
-                      <OfferCardAnalyticsRow
+                      <OfferCard
                         title={offer.title}
-                        description={offer.shortDescription}
+                        description={""}
                         creator={offer.creator}
                         dateCreated={offer.dateCreated}
                         id={offer.id}
+                        image={offer.image}
                       />
                     </Grid>
 
@@ -255,8 +280,8 @@ export default function Offers() {
                             </TableCell>
 
                             <TableCell>
-                              <Button variant="outlined" color="secondary" style={{ marginRight: '8px' }}>Edit</Button>
-                              <Button variant="contained" color="secondary">Delete</Button>
+                              <Button variant="outlined" color="secondary" onClick={() => console.log("edit", key)} style={{ marginRight: '8px' }}>Edit</Button>
+                              <Button variant="contained" color="secondary" onClick={() => deleteOffer(offer.id)}>Delete</Button>
                             </TableCell>
                             <TableCell>{offer.dateCreated ? convertDate(offer.dateCreated.seconds) : null}</TableCell>
                           </TableRow>

@@ -21,7 +21,7 @@ import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
 import SocialMediaListItem from '../../components/SocialMediaListItem';
-import { capitalize } from '../../utils/helperFunctions/stringFormatting';
+import { capitalize, displayRegion } from '../../utils/helperFunctions/stringFormatting';
 
 const useStyles = makeStyles((theme) => ({
 
@@ -171,7 +171,7 @@ export default function Profile({ user, }) {
                                         </Typography>
                                         <Divider style={{ marginBottom: "16px" }} />
                                         <Typography variant="h5" gutterBottom component="h2" color="inherit">
-                                            Located in <b>{capitalize(userInformation.region)}</b>
+                                            Located in <b>{capitalize(displayRegion(userInformation.region))}</b>
                                         </Typography>
 
                                     </Paper>
@@ -248,22 +248,30 @@ export default function Profile({ user, }) {
 export async function getServerSideProps(context) {
     const id = context.query.id;
     let user = null;
+    let userDoc;
+    let userInsta;
     //-----Firebase------------//
     initFirebase();
     let db = firebase.firestore();
-
-    await db.collection('users').doc(id).get()
-        .then((thisUserDoc) => {
-            if (thisUserDoc.exists) {
-                user = thisUserDoc.data();
-            }
-            else {
-                // doc.data() will be undefined in this case
-                console.log("No such user!");
-            }
-        })
-        .catch((error) => { console.log("Error getting document:", error); })
+    try {
+        userDoc = await db.collection('users').doc(id).get();
+        user = userDoc.data();
+    }
+    catch (error) {
+        console.log("Error getting document:", error);
+    }
     //-----End Firebase--------//
+
+    try {
+        console.log("Insta:", user.socialMediaPlatforms?.instagram);
+        const instagramName = user?.socialMediaPlatforms?.instagram;
+        if (instagramName) {
+            userInsta = await fetch(`https://www.instagram.com/${instagramName}/?__a=1`)
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
 
     return {
         props: {

@@ -40,6 +40,7 @@ export default function AuthTwo() {
     const [user, setUser] = useState(null);
     const [stage, setStage] = useState(1);
     const [region, setRegion] = React.useState('');
+    const [gender, setGender] = React.useState('');
 
     const router = useRouter();
     //React Forms
@@ -89,10 +90,10 @@ export default function AuthTwo() {
         const { displayName, description } = data;
         try {
             await userDocumentRef.update({
-                //displayName and description
                 displayName,
                 description,
                 region,
+                gender,
             })
                 .then(() => setStage(3))
             console.log("Document successfully updated!");
@@ -134,6 +135,10 @@ export default function AuthTwo() {
 
     const handleChangeRegion = (event) => {
         setRegion(event.target.value)
+    };
+
+    const handleChangeGender = (event) => {
+        setGender(event.target.value)
     };
 
     switch (stage) {
@@ -197,13 +202,32 @@ export default function AuthTwo() {
 
                                             {/* About You */}
                                             <Typography variant="h5" color="secondary" gutterBottom><b>About You</b></Typography>
-                                            <Grid container item style={{ marginBottom: '32px' }} spacing={4} alignItems="center">
+                                            <Grid container item style={{ marginBottom: '16px' }} spacing={4} alignItems="center">
                                                 <Grid item><Typography variant="h6">1. What name (or Gamertag) do you go by?</Typography></Grid>
                                                 <Grid item><TextField type="text" label="Display Name" name="displayName" inputRef={register} /></Grid>
                                             </Grid>
 
                                             <Grid container item style={{ marginBottom: '32px' }} spacing={4} alignItems="center" justify="space-between">
-                                                <Grid item><Typography variant="h6">2. Which Region are you located?</Typography></Grid>
+                                                <Grid item><Typography variant="h6">2. What gender do you identify as?</Typography></Grid>
+                                                <Grid item style={{ width: '45%' }}>
+                                                    <Select style={{ width: '100%' }}
+                                                        labelId="demo-simple-select-placeholder-label-label"
+                                                        id="demo-simple-select-placeholder-label"
+                                                        value={gender}
+                                                        onChange={handleChangeGender}
+                                                        name="gender"
+                                                        inputRef={register}
+                                                    >
+                                                        <MenuItem value={"male"}>Male</MenuItem>
+                                                        <MenuItem value={"female"}>Female</MenuItem>
+                                                        <MenuItem value={"other"}>Other</MenuItem>
+                                                        
+                                                    </Select>
+                                                </Grid>
+                                            </Grid>
+
+                                            <Grid container item style={{ marginBottom: '32px' }} spacing={4} alignItems="center" justify="space-between">
+                                                <Grid item><Typography variant="h6">3. Which Region are you located?</Typography></Grid>
                                                 <Grid item style={{ width: '47.5%' }}>
                                                     <Select style={{ width: '100%' }}
                                                         labelId="demo-simple-select-placeholder-label-label"
@@ -226,7 +250,7 @@ export default function AuthTwo() {
                                             </Grid>
 
                                             <Grid container item spacing={4} alignItems="center">
-                                                <Grid item><Typography variant="h6">3. How would you describe yourself?</Typography></Grid>
+                                                <Grid item><Typography variant="h6">4. How would you describe yourself?</Typography></Grid>
                                             </Grid>
                                             <Grid item style={{ width: '100%', paddingBottom: '32px' }}><TextField type="text" multiline label="Description" name="description" inputRef={register} style={{ width: '100%' }} /></Grid>
 
@@ -240,7 +264,7 @@ export default function AuthTwo() {
                             </Grid>
                         </Container>
                     </main>
-                </React.Fragment>
+                </React.Fragment >
             )
 
         case 3:

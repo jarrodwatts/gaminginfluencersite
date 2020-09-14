@@ -75,7 +75,7 @@ export default function InfluencersDashboardComponent() {
                         <TableRow key={key}>
                             <TableCell><Avatar alt="Remy Sharp" src={influencer.photoURL} /></TableCell>
                             <TableCell><Typography>{influencer.displayName}</Typography></TableCell>
-                            <TableCell><Link color="primary" href={`/influencers/${influencer.uid}`}><Typography>Profile</Typography></Link></TableCell>
+                            <TableCell><Link color="primary" href={`/profile/${influencer.uid}`}><Typography>Profile</Typography></Link></TableCell>
                             <TableCell align="right"><Typography>{influencer.email}</Typography></TableCell>
                         </TableRow>
                     ))}
