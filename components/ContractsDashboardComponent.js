@@ -49,7 +49,6 @@ export default function Contracts() {
         userDoc.get().then((doc) => {
           if (doc.exists) {
             console.log(doc.data())
-            //Infite loop on setting userInformation below
             let docData = doc.data();
             setUserInformation(docData);
 

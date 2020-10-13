@@ -26,7 +26,6 @@ export default function OffersDashboardComponent() {
                 userDoc.get().then((doc) => {
                     if (doc.exists) {
                         console.log(doc.data())
-                        //Infite loop on setting userInformation below
                         setUserInformation(doc.data())
                     }
                 })
