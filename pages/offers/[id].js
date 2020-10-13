@@ -93,8 +93,8 @@ export default function Offer({ offer }) {
                                         style={{
                                             width: '100%',
                                             maxHeight: '420px',
-                                            objectFit: "cover",
-                                            marginTop: '16px', //makes it zoom, not stretch
+                                            objectFit: "cover", //makes it zoom, not stretch
+                                            marginTop: '16px',
                                         }}
                                         onClick={() => { console.log("image clicked") }}
                                     />

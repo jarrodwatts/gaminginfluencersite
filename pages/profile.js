@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
@@ -10,11 +10,18 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import initFirebase from '../utils/auth/initFirebase';
+import { Divider } from '@material-ui/core';
+import RoomIcon from '@material-ui/icons/Room';
+import EmojiPeopleIcon from '@material-ui/icons/EmojiPeople';
+import { useDropzone } from 'react-dropzone';
 import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
-import { useForm } from 'react-hook-form';  
-import { TwitchEmbed } from 'react-twitch-embed';
+import { useForm } from 'react-hook-form';
+import getImage from '../utils/helperFunctions/getImage';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import { capitalize, convertCreationTime } from '../utils/helperFunctions/stringFormatting';
 
 const useStyles = makeStyles((theme) => ({
 
@@ -35,13 +42,108 @@ const useStyles = makeStyles((theme) => ({
             margin: theme.spacing(1),
             width: '25ch',
         },
-    }
+    },
+    large: {
+        width: theme.spacing(24),
+        height: theme.spacing(24),
+    },
 }));
+
+//---Start Drag n Drop---\\
+const baseStyle = {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    padding: '20px',
+    borderWidth: 2,
+    borderRadius: 2,
+    borderColor: '#eeeeee',
+    borderStyle: 'dashed',
+    backgroundColor: '#fafafa',
+    color: '#bdbdbd',
+    outline: 'none',
+    transition: 'border .24s ease-in-out'
+};
+const activeStyle = {
+    borderColor: '#2196f3'
+};
+const acceptStyle = {
+    borderColor: '#00e676'
+};
+const rejectStyle = {
+    borderColor: '#ff1744'
+};
+
+
 
 export default function Profile() {
     const classes = useStyles();
     const [editMode, setEditMode] = useState(false);
+    const [filePreview, setFilePreview] = useState(null);
     const [userInformation, setUserInformation] = useState({})
+    const [value, setValue] = useState(0);
+    const [image, setImage] = useState(null);
+    const [saving, setSaving] = useState(false);
+    const [userImage, setUserImage] = useState(null)
+
+    function StyledDropzone() {
+
+        const onDrop = useCallback((acceptedFiles) => {
+            acceptedFiles.forEach((file) => {
+                setFilePreview(acceptedFiles.map(file => Object.assign(file, {
+                    preview: URL.createObjectURL(file)
+                })));
+
+                const reader = new FileReader()
+
+                reader.onabort = () => console.log('file reading was aborted')
+                reader.onerror = () => console.log('file reading has failed')
+                reader.onload = () => {
+                    // Do whatever you want with the file contents
+                    const binaryStr = reader.result
+                    console.log(binaryStr)
+                    //Set the var for state for later
+                    setImage(binaryStr);
+                }
+                reader.readAsArrayBuffer(file)
+            })
+
+        }, [])
+
+        const {
+            getRootProps,
+            getInputProps,
+            isDragActive,
+            isDragAccept,
+            isDragReject
+        } = useDropzone({ onDrop, accept: 'image/*' });
+
+        const style = useMemo(() => ({
+            ...baseStyle,
+            ...(isDragActive ? activeStyle : {}),
+            ...(isDragAccept ? acceptStyle : {}),
+            ...(isDragReject ? rejectStyle : {})
+        }), [
+            isDragActive,
+            isDragReject,
+            isDragAccept
+        ]);
+
+        return (
+            <div className="container">
+                <div {...getRootProps({ style })}>
+                    <input {...getInputProps()} />
+                    <Typography>Drag 'n' drop your image here, or click to select a file</Typography>
+                </div>
+            </div>
+        );
+    }
+    //---End Drag n Drop---\\
+
+    const handleChange = (event, newValue) => {
+        setValue(newValue);
+    };
 
     //Form Editor
     const { register, handleSubmit, errors } = useForm();
@@ -50,27 +152,33 @@ export default function Profile() {
 
     //-----Firebase------------//
     useEffect(() => {
+        const fetchImage = async (img) => {
+            console.log("Fetching", img)
+            const res = await getImage(img)
+            setUserImage(res);
+        }
+
         initFirebase();
-        firebase.auth().onAuthStateChanged((user) => {
+        firebase.auth().onAuthStateChanged(async (user) => {
             if (user) {
-                //now ask for user info
                 let db = firebase.firestore();
-                let userDoc = db.collection('users').doc(user.uid)
+                const userDoc = db.collection('users').doc(user.uid);
+                const userDocGet = await userDoc.get();
 
-                userDoc.get().then((doc) => {
-                    if (doc.exists) {
-                        console.log(doc.data())
-                        //Infite loop on setting userInformation below
-                        setUserInformation(doc.data())
-                    }
-                })
+                if (userDocGet.exists) {
+                    const userDocData = userDocGet.data();
+                    console.log("userDocData", userDocData)
+                    setUserInformation(userDocData)
+                    return fetchImage(userDocData.image)
+                }
+
             }
-
             else {
                 setUserInformation({})
                 console.log("Loading")
             }
         });
+
     }, [])
     //-----End Firebase--------//
 
@@ -81,56 +189,39 @@ export default function Profile() {
         let db = firebase.firestore();
         var userDocumentRef = db.collection("users").doc(userInformation.uid);
         // Set the "type" field of the value userType
+        setSaving(true)
+
         try {
             await userDocumentRef.update(JSON.parse(JSON.stringify(data)));
             console.log("Document successfully updated!");
+
+            //Image upload
+            let storage = firebase.storage();
+            let file = image;
+            let storageRef = storage.ref();
+            let imagesRef = storageRef.child('users');
+            let usersRef = imagesRef.child(`/${userInformation.uid}.png`);
+
+            usersRef.put(file)
+                .then(async () => {
+                    console.log("Uploaded profile picture")
+                    let existingDocRef = db.collection("users").doc(userInformation.uid);
+                    await existingDocRef.update({
+                        image: `users/${userInformation.uid}`,
+                        id: userInformation.uid //probably not required
+                    });
+                    console.log("Updated image field");
+                    setSaving(false);
+                    return setEditMode(false);
+                })
         }
         catch (error) {
             // The document probably doesn't exist.
             console.error("Error updating document: ", error);
         }
-
-        setEditMode(false);
     }
 
-    function renderTwitch() {
-        if (userInformation?.socialMediaPlatforms) {
-            if (userInformation.socialMediaPlatforms?.twitch) {
-                try {
-                    return (
-                        <Grid item xs={12}>
-                            <Paper className={classes.paper}>
-                                <Grid container direction="row" justify="space-around" alignItems="center">
-                                    <TwitchEmbed
-                                        channel={userInformation?.socialMediaPlatforms.twitch}
-                                        id={userInformation?.socialMediaPlatforms.twitch}
-                                        theme="dark"
-                                        muted
-                                        onVideoPause={() => console.log(':(')}
-                                    />
-                                    <Typography>
-                                        <b>Twitch:</b> {userInformation?.socialMediaPlatforms.twitch}
-                                    </Typography>
-                                </Grid>
-                            </Paper>
-                        </Grid>
-                    )
-                }
-                catch (erorr) {
-                    console.log(error);
-                    return (<div><Typography>Something went wrong</Typography></div>)
-                }
-            }
-
-            else {
-                return (
-                    <div>
-                    </div>)
-            }
-        }
-    }
-
-
+    console.log("user image:", userImage)
     return (
         !editMode ?
             (
@@ -140,49 +231,124 @@ export default function Profile() {
 
                     <main>
                         <Container className={classes.cardGrid} maxWidth="lg">
-                            <Grid container spacing={4}>
+                            <Grid container alignItems="center" justify="center" style={{ marginBottom: '64px' }}>
                                 <Grid container direction="row" justify="flex-end" style={{ marginBottom: '16px' }}>
                                     <Button
                                         variant="contained"
                                         color="secondary"
                                         onClick={() => { setEditMode(true); }}>
                                         Edit Profile
-                            </Button>
+                                    </Button>
                                 </Grid>
 
-                                <div className={classes.root}>
-                                    {/* Avatar and Description */}
-                                    <Grid container spacing={3}>
-                                        <Grid item xs={3} sm={3}>
-                                            <Paper className={classes.paper}>
-                                                <img src="https://source.unsplash.com/random"
-                                                    alt="Random Image"
-                                                    width="100%"
-                                                />
-                                            </Paper>
-                                        </Grid>
+                                <img src={userImage}
+                                    alt="Random Image"
+                                    height="280px"
+                                    width="100%"
+                                    style={{ marginBottom: '16px', backgroundSize: 'cover', objectFit: 'cover', }} // makes it zoom, not stretch
+                                />
 
-                                        <Grid item xs={9} >
-                                            <Paper className={classes.paper}>
-                                                <Grid container direction="row" alignItems="center" justify="center" style={{ paddingBottom: '32px' }} spacing={2}>
-                                                    <Avatar alt="Cindy Baker" src={userInformation.photoURL ? userInformation.photoURL : null} />
-                                                    <Typography style={{ paddingLeft: '16px' }}>
-                                                        <b>{userInformation.displayName}</b>
-                                                    </Typography>
+                                <Avatar src={userImage}
+                                    style={{
+                                        position: 'absolute',
+                                        bottom: '45%',
+                                        borderStyle: 'solid',
+                                        borderWidth: '5px',
+                                        borderColor: "#556cd6", //primary
+                                    }} className={classes.large} />
+
+                            </Grid>
+
+                            <Grid container alignItems="center" justify="center" direction="column" style={{ marginBottom: '32px' }}>
+                                {/* Name */}
+                                <Typography variant="h3">{userInformation.displayName}</Typography>
+                                {/* Bio / Description */}
+                                <Typography variant="h5">{userInformation.description}</Typography>
+
+                            </Grid>
+                            <Divider style={{ marginBottom: '16px' }} />
+                            <Grid container alignItems="center" justify="center" direction="column" style={{ marginBottom: '16px' }}>
+                                <Tabs
+                                    value={value}
+                                    onChange={handleChange}
+                                    indicatorColor="primary"
+                                    textColor="primary"
+                                    centered
+                                >
+                                    <Tab label="Overview" />
+                                    <Tab label="Social Media" />
+                                    <Tab label="Contact" />
+                                </Tabs>
+                            </Grid>
+
+                            <Container maxWidth="sm">
+                                <Grid container justify="center" direction="column">
+
+                                    {/* Overview */}
+                                    {value == 0 ?
+                                        <React.Fragment>
+                                            <Grid container direction="row" justify="space-between" alignItems="center" spacing={2}>
+                                                <Grid item>
+                                                    <Grid container item direction="row">
+                                                        <Grid item>
+                                                            <RoomIcon color="primary" style={{ marginRight: '4px' }} />
+                                                        </Grid>
+                                                        <Grid item>
+                                                            <Typography>From <b>{capitalize(userInformation?.region)}</b></Typography>
+                                                        </Grid>
+                                                    </Grid>
+
+                                                    <Grid container item direction="row">
+                                                        <Grid item>
+                                                            <EmojiPeopleIcon color="primary" style={{ marginRight: '4px' }} />
+                                                        </Grid>
+                                                        <Grid item>
+                                                            <Typography>Member Since  <b>{convertCreationTime(userInformation?.metadata?.creationTime)}</b></Typography>
+                                                        </Grid>
+                                                    </Grid>
                                                 </Grid>
 
-                                                <Typography>
-                                                    {userInformation.description}
-                                                </Typography>
-                                            </Paper>
-                                        </Grid>
-                                    </Grid>
+                                                <Grid item >
+                                                    what values they uphold and why a brand would use them
+                                                </Grid>
+                                            </Grid>
+                                        </React.Fragment>
+                                        : null}
 
-                                    {/* Twitch */}
-                                    {renderTwitch()}
+                                    {/* Socials */}
+                                    {value == 1 ?
+                                        <React.Fragment>
+                                            <Grid container direction="row" justify="space-between" alignItems="center" spacing={2}>
+                                                <Grid item>
+                                                    <Grid container item direction="column" alignItems="center">
+                                                        {Object.entries(userInformation?.socialMediaPlatforms).map((item, key) =>
+                                                            item[1] ? //Is there a value of the entry?
+                                                                <Grid container item key={key} direction="column" alignItems="center">
+                                                                    <Avatar src={`/assets/${item[0]}.png`} style={{ marginRight: '8px', marginBottom: '2px' }} />
+                                                                    <Typography variant="button"><b>{item}</b></Typography>
+                                                                </Grid>
+                                                                : null
+                                                        )}
+                                                    </Grid>
+                                                </Grid>
+                                                <Grid item >
+                                                    how they use their social media platforms to appeal to their audience
+                                                </Grid>
+                                            </Grid>
+                                        </React.Fragment>
 
-                                </div>
-                            </Grid>
+                                        : null}
+
+                                    {/* Contact */}
+                                    {value == 2 ?
+                                        <React.Fragment>
+                                        </React.Fragment>
+
+                                        : null}
+
+                                </Grid>
+                            </Container>
+
                         </Container>
                     </main>
 
@@ -198,6 +364,20 @@ export default function Profile() {
 
                         <Container className={classes.cardGrid} maxWidth="lg">
                             <Grid container direction="column" alignItems="center" justify="center">
+
+                                {/* Cover Photo */}
+                                <Typography color="primary" variant="h5" gutterBottom>Profile Image</Typography>
+                                <Grid item style={{ marginBottom: '32px' }}>
+                                    {filePreview ?
+                                        <img
+                                            src={filePreview[0].preview}
+                                            style={{
+                                                maxHeight: '200px'
+                                            }}
+                                        /> :
+                                        <StyledDropzone />
+                                    }
+                                </Grid>
 
                                 {/* About You */}
                                 <Typography color="primary" variant="h5" gutterBottom>About You</Typography>
