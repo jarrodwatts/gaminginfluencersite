@@ -47,9 +47,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-export default function Offer({ offer }) {
+export default function Offer({ offer, applicants }) {
     const classes = useStyles();
     const [offerImage, setOfferImage] = useState(null)
+    const [firebaseUserInformation, setUserInformation] = useState({})
+    const [alreadyApplied, setAlreadyApplied] = useState(false);
 
     useEffect(() => {
         const fetchImage = async () => {
@@ -62,8 +64,59 @@ export default function Offer({ offer }) {
         }
     }, [offer.image])
 
+    useEffect(() => {
+        initFirebase();
+        let db = firebase.firestore();
+        firebase.auth().onAuthStateChanged((userLoggedInAs) => {
+            //this "user" (userLoggedIn) is the user currently logged in.
+            if (userLoggedInAs) {
+                //now ask for user info
+                let userDoc = db.collection('users').doc(userLoggedInAs.uid);
+
+                userDoc.get().then(async (doc) => {
+                    if (doc.exists) {
+                        setUserInformation(doc.data())
+                        setAlreadyApplied(applicants.filter(applicant => applicant.uid === userLoggedInAs.uid).length > 0);
+                    }
+                })
+            }
+        })
+    }, [])
+    //-----End Firebase--------//
+
     console.log(offer)
-    console.log(offerImage);
+    console.log("Aplicants:", applicants)
+    console.log("Already applied?", alreadyApplied)
+
+    const handleApply = async () => {
+        console.log("handling...")
+        setAlreadyApplied(!alreadyApplied)
+        //We have a list of applicants available to us through "applicants"
+        console.log("Firebaseuser:", firebaseUserInformation)
+        if (firebaseUserInformation) {
+            //push the user to subcolleciton
+            initFirebase();
+            let db = firebase.firestore();
+            let offerDoc = db.collection('offers').doc(offer.id)
+            let applicantsSubcollection = offerDoc.collection('applicants');
+
+            if (!alreadyApplied) { //We're saving them
+                applicantsSubcollection.doc(firebaseUserInformation.uid).set(
+                    JSON.parse(JSON.stringify(firebaseUserInformation))
+                )
+                    .then(() => console.log("Success"))
+                    .catch((error) => console.log("Error", error))
+            }
+
+            else { //We're removing them
+                applicantsSubcollection.doc(firebaseUserInformation.uid).delete()
+                    .then(() => console.log("Success"))
+                    .catch((error) => console.log("Error", error))
+            }
+
+        }
+    }
+
     return (
         <React.Fragment>
             <CssBaseline />
@@ -131,12 +184,6 @@ export default function Offer({ offer }) {
                                         {offer.creatorName} is looking for:
                                     </Typography>
 
-                                    {/* <div style={{ marginTop: '16px', marginBottom: '16px' }}>
-                                        <Typography>
-                                            We're looking for gamers who play competitive games like poo poo
-                                        </Typography>
-                                    </div> */}
-
                                     <Divider style={{ marginTop: '8px', marginBottom: '8px' }} />
 
                                     <div className={classes.list}>
@@ -156,12 +203,22 @@ export default function Offer({ offer }) {
                                     </div>
 
                                     {/* Apply Button */}
-                                    <Button
-                                        onClick={() => { console.log("Applied") }}
-                                        variant="contained"
-                                        color="secondary">
-                                        Apply for Offer
-                                    </Button>
+                                    {!alreadyApplied ?
+                                        <Button
+                                            onClick={() => { handleApply() }}
+                                            variant="contained"
+                                            color="primary">
+                                            Apply for Offer
+                                        </Button>
+                                        :
+                                        <Button
+                                            onClick={() => { handleApply() }}
+                                            variant="contained"
+                                            color="secondary">
+                                            Withdraw Application
+                                        </Button>
+                                    }
+
 
                                 </Paper>
 
@@ -189,10 +246,9 @@ export default function Offer({ offer }) {
 export async function getServerSideProps(context) {
     const id = context.query.id;
     let offer = null;
-    let image = null;
+    let applicants = null;
     global.XMLHttpRequest = require("xhr2");
-    //-----Firebase------------//
-    //useEffect(() => {
+
     initFirebase();
     let db = firebase.firestore();
 
@@ -206,14 +262,21 @@ export async function getServerSideProps(context) {
                 // doc.data() will be undefined in this case
                 console.log("No such document!");
             }
+            return thisOfferDoc
+        })
+        .then(async (thisOfferDoc) => {
+            //Get Subcollection 'applicants'
+            const applicantsRef = await thisOfferDoc.ref.collection('applicants').get();
+            const applicantsData = applicantsRef.docs.map(doc => doc.data());
+            console.log(applicantsData)
+            applicants = applicantsData;
         })
         .catch((error) => { console.log("Error getting document:", error); })
 
-    //}, [])
-    //-----End Firebase--------//
     return {
         props: {
             offer: JSON.parse(JSON.stringify(offer)),
+            applicants: JSON.parse(JSON.stringify(applicants))
         }
     };
 }

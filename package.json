@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "jest"
   },
   "dependencies": {
     "@material-ui/core": "^4.11.0",
@@ -26,5 +27,8 @@
     "swr": "0.2.3",
     "xhr2": "^0.2.0",
     "xmlhttprequest": "^1.8.0"
+  },
+  "devDependencies": {
+    "jest": "^26.5.3"
   }
 }

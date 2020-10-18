@@ -71,7 +71,6 @@ export default function Profile({ user, }) {
                 userDoc.get().then(async (doc) => {
                     if (doc.exists) {
                         setUserInformation(doc.data())
-                        console.log("user:", user)
 
                         //Try get the savedInfluencers subcollection
                         const savedInfluencersRef = await doc.ref.collection('savedInfluencers').get();
