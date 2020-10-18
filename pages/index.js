@@ -124,7 +124,7 @@ export default function Index() {
       filtered = filtered.filter(influencer => influencer.region == region);
     }
     if (platform != '') {
-      filtered = filtered.filter(influencer => influencer.socialMediaPlatforms.hasOwnProperty(platform))
+      filtered = filtered.filter(influencer => influencer.socialMediaPlatforms[event.target.value] != "")
     }
     setInfluencers(filtered);
   };
@@ -133,7 +133,7 @@ export default function Index() {
     setPlatform(event.target.value);
     let filtered;
     if (event.target.value != "none") {
-      filtered = staticInfluencers.filter(influencer => influencer.socialMediaPlatforms.hasOwnProperty(event.target.value));
+      filtered = staticInfluencers.filter(influencer => influencer.socialMediaPlatforms[event.target.value] != "")
     }
     else {
       setPlatform('')
@@ -160,7 +160,7 @@ export default function Index() {
       filtered = staticInfluencers.filter(influencer => influencer)
     }
     if (platform != '') {
-      filtered = filtered.filter(influencer => influencer.socialMediaPlatforms.hasOwnProperty(platform))
+      filtered = filtered.filter(influencer => influencer.socialMediaPlatforms[event.target.value] != "")
     }
     if (gender != '') {
       filtered = filtered.filter(influencer => influencer.gender == gender);
