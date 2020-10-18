@@ -18,7 +18,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import initFirebase from '../utils/auth/initFirebase';
 import { useRouter } from 'next/router'
 import Router from 'next/router'
-import { capitalize } from '../utils/helperFunctions/stringFormatting';
+import { capitalize, displayRegion } from '../utils/helperFunctions/stringFormatting';
 
 const useStyles = makeStyles((theme) => ({
     avatarSize: {
@@ -49,35 +49,36 @@ export default function InfluencerCard(props) {
 
     return (
         <Card className={classes.card}>
-            <Grid container direction="column" alignItems="center" >
-                {/* Cover Image */}
-                <Grid item>
-                    {influencerImage ? <img src={influencerImage}
-                        style={{ maxHeight: '96px', backgroundSize: 'cover', objectFit: 'cover', width: '100%', }} />
-                        : <CircularProgress color="primary" style={{ marginTop: '8px' }} />}
-                </Grid>
+            <Link color="inherit" href={`/profile/${props.uid}`} underline="none">
+                <Grid container direction="column" alignItems="center" >
+                    {/* Cover Image */}
+                    <Grid item>
+                        {influencerImage ? <img src={influencerImage}
+                            style={{ maxHeight: '96px', backgroundSize: 'cover', objectFit: 'cover', width: '100%', }} />
+                            : <CircularProgress color="primary" style={{ marginTop: '8px' }} />}
+                    </Grid>
 
-                <Grid item>
-                    {/* Profile Image */}
-                    {influencerImage ? <Avatar src={influencerImage} className={classes.avatarSize}
-                        style={{
-                            borderStyle: 'solid',
-                            borderWidth: '2px',
-                            borderColor: "#fff",
-                        }} />
-                        : <CircularProgress color="primary" style={{ marginTop: '8px' }} />}
-                </Grid>
+                    <Grid item>
+                        {/* Profile Image */}
+                        {influencerImage ? <Avatar src={influencerImage} className={classes.avatarSize}
+                            style={{
+                                borderStyle: 'solid',
+                                borderWidth: '2px',
+                                borderColor: "#fff",
+                            }} />
+                            : <CircularProgress color="primary" style={{ marginTop: '8px' }} />}
+                    </Grid>
 
-                {/* Display Name */}
-                <Grid item>
-                    <Typography variant="h5" style={{ marginTop: '8px' }}>{props.displayName}</Typography>
-                </Grid>
+                    {/* Display Name */}
+                    <Grid item>
+                        <Typography variant="h5" style={{ marginTop: '8px' }}>{props.displayName}</Typography>
+                    </Grid>
 
-                <Grid item style={{ width: '75%', marginTop: '8px' }}>
-                    <Divider style={{ width: '100%' }} />
-                </Grid>
+                    <Grid item style={{ width: '75%', marginTop: '8px' }}>
+                        <Divider style={{ width: '100%' }} />
+                    </Grid>
 
-                {/* Description
+                    {/* Description
                 <Grid item>
                     <Typography variant="body1" style={{ marginTop: '8px' }}>{props.description}</Typography>
                 </Grid>
@@ -86,27 +87,28 @@ export default function InfluencerCard(props) {
                     <Divider style={{ width: '100%' }} />
                 </Grid> */}
 
-                <div style={{ width: '50%' }}>
-                    <Grid container item direction="row" alignItems="center" style={{ marginTop: '8px' }}>
-                        <Grid item>
-                            <SportsEsportsIcon color="primary" />
-                        </Grid>
-                        <Grid item item style={{ marginLeft: '8px' }}>
-                            <Typography>{props.category}</Typography>
-                        </Grid>
-                    </Grid>
-
-                    <Grid container item direction="row" alignItems="center" >
-                        <Grid item>
-                            <RoomIcon color="primary" />
-                        </Grid>
-                        <Grid item style={{ marginLeft: '8px' }}>
-                            <Typography>From {capitalize(props.region)}</Typography>
+                    <div style={{ width: '65%' }}>
+                        <Grid container item direction="row" alignItems="center" style={{ marginTop: '8px' }}>
+                            <Grid item>
+                                <SportsEsportsIcon color="primary" />
+                            </Grid>
+                            <Grid item item style={{ marginLeft: '8px' }}>
+                                <Typography>{props.category}</Typography>
+                            </Grid>
                         </Grid>
 
-                    </Grid>
-                </div>
-            </Grid>
+                        <Grid container item direction="row" alignItems="center" >
+                            <Grid item>
+                                <RoomIcon color="primary" />
+                            </Grid>
+                            <Grid item style={{ marginLeft: '8px' }}>
+                                <Typography>From <b>{capitalize(displayRegion(props.region))}</b></Typography>
+                            </Grid>
+
+                        </Grid>
+                    </div>
+                </Grid>
+            </Link>
         </Card>
 
 
