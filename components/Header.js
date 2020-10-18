@@ -55,6 +55,7 @@ export default function MenuAppBar() {
         setAnchorEl(null);
     };
 
+    console.log("user:", user)
     return (
         <div className={classes.root}>
             <AppBar position="static">
@@ -106,6 +107,7 @@ export default function MenuAppBar() {
                                 onClose={handleClose}
                             >
                                 <MenuItem onClick={() => router.push('/profile')}>Profile</MenuItem>
+                                {userDetails?.type == "Brand" ? <MenuItem onClick={() => router.push('/dashboard')}>Dashboard</MenuItem> : null}
                                 <MenuItem onClick={() => logout()}>Logout</MenuItem>
                             </Menu>
                         </Grid>

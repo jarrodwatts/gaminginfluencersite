@@ -262,18 +262,20 @@ export default function Index() {
               {influencers.map((influencer, key) => (
                 <Grid item key={key} xs={12} sm={6} md={3}>
                   <InfluencerCard
+                    image={influencer.image}
                     displayName={influencer.displayName}
                     category={influencer.category}
                     socialMediaPlatforms={influencer.socialMediaPlatforms}
                     uid={influencer.uid}
                     description={influencer.description}
+                    region={influencer.region}
                   />
                 </Grid>
               ))}
             </Grid>
           </Container>
         </main>
-        <Footer />
+        {/* <Footer /> */}
       </React.Fragment>
     )
   }
@@ -305,7 +307,7 @@ export default function Index() {
             </Grid>
           </Container>
         </main>
-        <Footer />
+        {/* <Footer /> */}
       </React.Fragment>
     );
   }
