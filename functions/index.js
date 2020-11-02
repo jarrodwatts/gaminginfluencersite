@@ -1,5 +1,7 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const fetch = require('node-fetch');
+const jsdom = require("jsdom");
 
 const firebaseConfig = {
     apiKey: "AIzaSyBJpt1wi53ctf7by7Wud5K_s83vFLlfbVg",
@@ -19,6 +21,7 @@ admin.initializeApp(
 exports.createUserDocument = functions.auth.user().onCreate((user) => {
     try {
         console.log("Attempting to create user");
+        functions.logger.info(user);
         return admin
             .firestore()
             .collection('users')
@@ -30,3 +33,59 @@ exports.createUserDocument = functions.auth.user().onCreate((user) => {
         return null;
     }
 });
+
+// Listens for new messages added to /messages/:documentId/original and creates an
+// uppercase version of the message to /messages/:documentId/uppercase
+exports.updateInstagram = functions.firestore.document('/users/{documentId}')
+    .onUpdate((snap, context) => {
+        const documentId = context.params.documentId;
+        const before = snap.before.data();
+        const after = snap.after.data();
+
+        const igUsername = before["socialMediaPlatforms"]["instagram"]
+
+        functions.logger.log("Ig: ", igUsername);
+        fetch(`https://www.instagram.com/${igUsername}`)
+            .then(res => res.text())
+            .then(
+                body => {
+                    const DOM = new jsdom.JSDOM(body);
+
+                    let qs = DOM.window.document.querySelector("head > meta:nth-child(39)");
+
+                    const followers = qs.content.split(" ")[0];
+                    const following = qs.content.split(" ")[2];
+                    const posts = qs.content.split(" ")[4];
+                    const username = qs.content.split("@")[1].split(")")[0]
+                    const imageUrl = DOM.window.document.querySelector("head > meta:nth-child(41)").content;
+
+                    //Make check for changes to avoid infinite loop
+                    if (
+                        //ESLint is preventing me from Optional Chaining here idk why...
+                        before.socialMediaPlatforms &&
+                        after.socialMediaPlatforms &&
+                        before.socialMediaPlatforms.instagram === after.socialMediaPlatforms.instagram
+                    ) {
+                        functions.logger.log("Saw no changes, not writing anything")
+                        return null
+                    }
+                    else {
+                        functions.logger.log("Writing new instagram data")
+                        return admin.
+                            firestore().collection('users').doc(documentId)
+                            .update({
+                                socialStatistics: {
+                                    instagram: {
+                                        followers: followers,
+                                        following: following,
+                                        posts: posts,
+                                        username: username,
+                                        imageUrl: imageUrl
+                                    }
+                                }
+                            })
+                    }
+                })
+
+            .catch((err) => functions.logger.warn(err))
+    });
