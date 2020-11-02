@@ -84,8 +84,8 @@ export default function InfluencersDashboardComponent() {
             </Table>
 
             <div className={classes.seeMore}>
-                <Link color="primary" href="#" onClick={preventDefault}>
-                    See all saved influencers
+                <Link color="primary" href="/dashboard/influencers" >
+                    See All Saved Influencers
                 </Link>
             </div>
 

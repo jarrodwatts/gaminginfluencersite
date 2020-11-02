@@ -18,21 +18,21 @@ const theme = createMuiTheme({
     },
     
 		"background": {
-			"paper": "rgba(71, 70, 100, 1)",
-			"default": "rgba(47, 46, 73, 1)"
+			"paper": "#353941",
+			"default": "#26282b"
     },
     
 		"primary": {
-			"light": "#7986cb",
-			"main": "rgba(141, 101, 234, 1)",
-			"dark": "#303f9f",
+			"light": "#5f85db",
+			"main": "#5f85db",
+			"dark": "#5f85db",
 			"contrastText": "rgba(249, 249, 249, 1)"
     },
     
 		"secondary": {
-			"light": "#ff4081",
-			"main": "rgba(29, 143, 226, 1)",
-			"dark": "#c51162",
+			"light": "#ee6f57",
+			"main": "#ee6f57",
+			"dark": "#ee6f57",
 			"contrastText": "rgba(249, 249, 249, 1)"
     },
     

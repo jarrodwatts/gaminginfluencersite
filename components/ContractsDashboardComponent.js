@@ -15,11 +15,6 @@ import 'firebase/firestore'
 import initFirebase from '../utils/auth/initFirebase';
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 
-// Generate Order Data
-function createData(id, date, name, shipTo, paymentMethod, amount) {
-  return { id, date, name, shipTo, paymentMethod, amount };
-}
-
 function preventDefault(event) {
   event.preventDefault();
 }
@@ -109,8 +104,8 @@ export default function Contracts() {
       </Table>
 
       <div className={classes.seeMore}>
-        <Link color="primary" href="#" onClick={preventDefault}>
-          See all Contracts
+        <Link color="primary" href={"/dashboard/contracts"}>
+          See All Contracts
         </Link>
       </div>
 
