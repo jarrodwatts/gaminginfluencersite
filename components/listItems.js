@@ -14,28 +14,28 @@ export const mainListItems = (
     <div>
         <ListItem button onClick={() => {Router.push("/dashboard")}}>
             <ListItemIcon>
-                <DashboardIcon />
+                <DashboardIcon color="primary"/>
             </ListItemIcon>
             <ListItemText primary="Dashboard" />
         </ListItem>
 
         <ListItem button onClick={() => {Router.push("/dashboard/offers")}}>
             <ListItemIcon>
-                <PagesIcon />
+                <PagesIcon color="primary"/>
             </ListItemIcon>
             <ListItemText primary="Offers" />
         </ListItem>
 
         <ListItem button onClick={() => {Router.push("/dashboard/influencers")}}>
             <ListItemIcon>
-                <PeopleIcon />
+                <PeopleIcon color="primary"/>
             </ListItemIcon>
             <ListItemText primary="Influencers" />
         </ListItem>
 
         <ListItem button onClick={() => {Router.push("/dashboard/contracts")}}>
             <ListItemIcon>
-                <DescriptionIcon />
+                <DescriptionIcon color="primary"/>
             </ListItemIcon>
             <ListItemText primary="Contracts" />
         </ListItem>
@@ -48,14 +48,14 @@ export const secondaryListItems = (
         {/* <ListSubheader inset>Manage Your Profile</ListSubheader> */}
         <ListItem button onClick={() => {Router.push("/dashboard/profile")}}>
             <ListItemIcon>
-                <AccountCircleIcon />
+                <AccountCircleIcon color="primary"/>
             </ListItemIcon>
             <ListItemText primary="Profile" />
         </ListItem>
 
         <ListItem button onClick={() => {Router.push("/dashboard/settings")}}>
             <ListItemIcon>
-                <SettingsIcon />
+                <SettingsIcon color="primary"/>
             </ListItemIcon>
             <ListItemText primary="Settings" />
         </ListItem>

@@ -44,7 +44,7 @@ export default function OfferCard(props) {
     console.log(props);
 
     return (
-        <Link href={`/offers/${props.id}`}>
+        <Link href={`/offers/${props.id}`} underline="none">
             <Card className={classes.card} >
                 {offerImage ? <
                     CardMedia

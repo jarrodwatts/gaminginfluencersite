@@ -56,7 +56,7 @@ export default function OffersDashboardComponent() {
 
     return (
         <React.Fragment>
-            <Title>Your Offers</Title>
+            <Title color="secondary">Your Offers</Title>
             <ResponsiveContainer>
 
                 <Grid container spacing={4}>

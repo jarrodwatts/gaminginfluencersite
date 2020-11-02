@@ -5,6 +5,7 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import NavBar from '../components/Header';
+import SocialIcon from '../components/SocialIcon';
 import Paper from '@material-ui/core/Paper';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
@@ -281,13 +282,12 @@ export default function Profile() {
                                 </Tabs>
                             </Grid>
 
-                            <Container maxWidth="sm">
-                                <Grid container justify="center" direction="column">
-
+                            <Container maxWidth="md">
+                                <Grid container justify="space-between" alignItems="center" direction="row" spacing={3}>
                                     {/* Overview */}
                                     {value == 0 ?
                                         <React.Fragment>
-                                            <Grid container direction="row" justify="space-between" alignItems="center" spacing={2}>
+                                            <Grid item xs={4}>
                                                 <Grid item>
                                                     <Grid container item direction="row">
                                                         <Grid item>
@@ -307,9 +307,15 @@ export default function Profile() {
                                                         </Grid>
                                                     </Grid>
                                                 </Grid>
+                                            </Grid>
 
-                                                <Grid item >
-                                                    what values they uphold and why a brand would use them
+                                            <Divider orientation="vertical" flexItem />
+
+                                            <Grid item xs={7}>
+                                                <Grid container direction="row" justify="space-between" alignItems="center" spacing={2}>
+                                                    <Grid item >
+                                                        what values they uphold and why a brand would use them
+                                                    </Grid>
                                                 </Grid>
                                             </Grid>
                                         </React.Fragment>
@@ -318,23 +324,38 @@ export default function Profile() {
                                     {/* Socials */}
                                     {value == 1 ?
                                         <React.Fragment>
-                                            <Grid container direction="row" justify="space-between" alignItems="center" spacing={2}>
-                                                <Grid item>
-                                                    <Grid container item direction="column" alignItems="center">
-                                                        {Object.entries(userInformation?.socialMediaPlatforms).map((item, key) =>
-                                                            item[1] ? //Is there a value of the entry?
-                                                                <Grid container item key={key} direction="column" alignItems="center">
-                                                                    <Avatar src={`/assets/${item[0]}.png`} style={{ marginRight: '8px', marginBottom: '2px' }} />
-                                                                    <Typography variant="button"><b>{item}</b></Typography>
-                                                                </Grid>
-                                                                : null
-                                                        )}
+                                            <Container maxWidth="sm">
+                                                <Grid container direction="row" justify="space-between" alignItems="center" spacing={2}>
+                                                    <Grid item xs={5}>
+                                                        <Grid container item direction="column" alignItems="center" spacing={1}>
+                                                            {Object.entries(userInformation?.socialMediaPlatforms).map((item, key) =>
+                                                                item[1] ? //Is there a value of the entry?
+                                                                    <React.Fragment>
+                                                                        <Grid container item key={key} direction="row" alignItems="center" spacing={3}>
+                                                                            <Grid item>
+                                                                                <SocialIcon platformName={item[0]} />
+                                                                            </Grid>
+
+                                                                            <Grid item>
+                                                                                <Typography>{capitalize(item[1])}</Typography>
+                                                                            </Grid>
+                                                                        </Grid>
+                                                                        <Divider style={{ "width": '45%' }}></Divider>
+                                                                    </React.Fragment>
+
+                                                                    : null
+                                                            )}
+
+                                                        </Grid>
+                                                    </Grid>
+
+                                                    <Divider orientation="vertical" flexItem />
+
+                                                    <Grid item xs={6}>
+                                                        how they use their social media platforms to appeal to their audience
                                                     </Grid>
                                                 </Grid>
-                                                <Grid item >
-                                                    how they use their social media platforms to appeal to their audience
-                                                </Grid>
-                                            </Grid>
+                                            </Container>
                                         </React.Fragment>
 
                                         : null}
@@ -345,7 +366,6 @@ export default function Profile() {
                                         </React.Fragment>
 
                                         : null}
-
                                 </Grid>
                             </Container>
 
