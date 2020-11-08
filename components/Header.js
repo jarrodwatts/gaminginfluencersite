@@ -11,10 +11,6 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import { useUser } from '../utils/auth/useUser'
 import { useRouter } from 'next/router'
-import getUser from '../utils/auth/getUser';
-import initFirebase from '../utils/auth/initFirebase';
-import firebase from 'firebase/app'
-import 'firebase/auth'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -33,19 +29,14 @@ export default function MenuAppBar() {
     const classes = useStyles();
     const [username, setUsername] = useState(null);
     const [userDetails, setUserDetails] = useState(null);
-    const { user, logout } = useUser()
+    const { user, userDocument, logout } = useUser()
     const router = useRouter()
     const [anchorEl, setAnchorEl] = useState(null);
 
     useEffect(() => {
-        firebase.auth().onAuthStateChanged(async (user) => {
-            initFirebase();
-            const res = await getUser(user);
-            setUserDetails(res);
-            setUsername(res?.displayName)
-
-        });
-    }, []);
+        setUserDetails(userDocument)
+        setUsername(userDocument?.displayName)
+    }, [userDocument]);
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -55,7 +46,6 @@ export default function MenuAppBar() {
         setAnchorEl(null);
     };
 
-    console.log("user:", user)
     return (
         <div className={classes.root}>
             <AppBar position="static">
