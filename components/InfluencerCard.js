@@ -32,7 +32,6 @@ const useStyles = makeStyles((theme) => ({
 
 export default function InfluencerCard(props) {
     const classes = useStyles();
-    console.log("props", props);
     const [influencerImage, setInfluencerImage] = React.useState(null)
 
     useEffect(() => {
@@ -45,8 +44,7 @@ export default function InfluencerCard(props) {
             fetchImage()
         }
     }, [props.image])
-    console.log(props);
-
+    
     return (
         <Card className={classes.card}>
             <Link color="inherit" href={`/profile/${props.uid}`} underline="none">

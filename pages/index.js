@@ -1,26 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Grid from '@material-ui/core/Grid';
 import MenuItem from '@material-ui/core/MenuItem';
-import Menu from '@material-ui/core/Menu';
-import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
 import Typography from '@material-ui/core/Typography';
-import Chip from '@material-ui/core/Chip';
 import Divider from '@material-ui/core/Divider';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import dynamic from 'next/dynamic'
 import firebase from 'firebase/app'
-import getUser from '../utils/auth/getUser';
 import 'firebase/auth'
 import 'firebase/firestore'
-import initFirebase from '../utils/auth/initFirebase';
+import { useUser } from '../utils/auth/useUser'
 
-const Footer = dynamic(() => import('../components/Footer'))
 const NavBar = dynamic(() => import('../components/Header'))
 const OfferCard = dynamic(() => import('../components/OfferCard'))
 const InfluencerCard = dynamic(() => import('../components/InfluencerCard'))
@@ -54,59 +48,21 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
-export default function Index() {
+export default function Index({ influencersFromDb, offersFromDb }) {
   const classes = useStyles();
   const [userInformation, setUserInformation] = useState({})
-  const [offers, setOffers] = useState([])
-  const [open, setOpen] = useState(false);
-  const [influencers, setInfluencers] = useState([])
-  const [staticInfluencers, writeToStaticInfluencers] = useState()
-  const [filters, setFilters] = useState([])
+  const [influencers, setInfluencers] = useState(influencersFromDb)
+  const [staticInfluencers, writeToStaticInfluencers] = useState(influencersFromDb)
 
   //Filters...
   const [gender, setGender] = useState('');
   const [platform, setPlatform] = useState('');
   const [region, setRegion] = useState('');
 
-  //-----Firebase------------//
+  const { userDocument } = useUser()
   useEffect(() => {
-    firebase.auth().onAuthStateChanged(async (user) => {
-      initFirebase();
-      const res = await getUser(user);
-      setUserInformation(res);
-
-      let db = firebase.firestore();
-
-      let offersFromDb = [];
-      //Regardless... Get offers from offers collection.
-      let offersCollection = db.collection('offers') //can add WHERE clause here
-        .get()
-        .then((querySnapshot) => {
-          querySnapshot.forEach(function (doc) {
-            // doc.data() is never undefined for query doc snapshots
-            offersFromDb.push(doc.data())
-          });
-          setOffers(offersFromDb);
-        })
-      //}
-
-      //Else load influencers
-      //else {
-      let influencersFromDb = [];
-      db.collection('users').where("type", "==", "Influencer")
-        .get()
-        .then((querySnapshot) => {
-          querySnapshot.forEach((doc) => {
-            influencersFromDb.push(doc.data())
-          });
-          setInfluencers(influencersFromDb);
-          writeToStaticInfluencers(influencersFromDb);
-        })
-      //}
-    });
-
-  }, [])
-  //-----End Firebase--------//
+    setUserInformation(userDocument)
+  }, [userDocument])
 
   const handleChangeGender = (event) => {
     //check if event.target.value is same as current filter to revert filter
@@ -187,7 +143,7 @@ export default function Index() {
                 <FormControl className={classes.formControl}>
                   <InputLabel shrink id="demo-simple-select-placeholder-label-label">
                     Gender
-                  </InputLabel>
+                </InputLabel>
                   <Select
                     labelId="demo-simple-select-placeholder-label-label"
                     id="demo-simple-select-placeholder-label"
@@ -209,7 +165,7 @@ export default function Index() {
                 <FormControl className={classes.formControl}>
                   <InputLabel shrink id="demo-simple-select-placeholder-label-label">
                     Platform
-                  </InputLabel>
+                </InputLabel>
                   <Select
                     labelId="demo-simple-select-placeholder-label-label"
                     id="demo-simple-select-placeholder-label"
@@ -234,7 +190,7 @@ export default function Index() {
                 <FormControl className={classes.formControl}>
                   <InputLabel shrink id="demo-simple-select-placeholder-label-label">
                     Region
-                  </InputLabel>
+                </InputLabel>
                   <Select
                     labelId="demo-simple-select-placeholder-label-label"
                     id="demo-simple-select-placeholder-label"
@@ -291,7 +247,7 @@ export default function Index() {
 
           <Container className={classes.cardGrid} maxWidth="lg">
             <Grid container spacing={4}>
-              {offers.map((offer, key) => (
+              {offersFromDb.map((offer, key) => (
                 <Grid item key={key} xs={12} sm={6} md={4}>
                   <OfferCard
                     title={offer.title}
@@ -311,4 +267,36 @@ export default function Index() {
       </React.Fragment>
     );
   }
+}
+
+export async function getServerSideProps() {
+
+  let db = firebase.firestore();
+
+  let offersFromDb = [];
+  await db.collection('offers') //can add WHERE clause here
+    .get()
+    .then((querySnapshot) => {
+      querySnapshot.forEach(function (doc) {
+        // doc.data() is never undefined for query doc snapshots
+        offersFromDb.push(doc.data())
+      });
+    })
+
+  let influencersFromDb = [];
+  await db.collection('users').where("type", "==", "Influencer")
+    .get()
+    .then((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        influencersFromDb.push(doc.data())
+      });
+    })
+
+  return {
+    props: {
+      influencersFromDb: JSON.parse(JSON.stringify(influencersFromDb)),
+      offersFromDb: JSON.parse(JSON.stringify(offersFromDb))
+    }
+  }
+
 }
