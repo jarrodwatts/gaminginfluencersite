@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Grid from '@material-ui/core/Grid';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -14,6 +14,7 @@ import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
 import { useUser } from '../utils/auth/useUser'
+import UserContext from '../utils/auth/UserContext';
 
 const NavBar = dynamic(() => import('../components/Header'))
 const OfferCard = dynamic(() => import('../components/OfferCard'))
@@ -49,6 +50,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function Index({ influencersFromDb, offersFromDb }) {
+
+  // User Context...
+  const contextualUser = useContext(UserContext);
+
+  console.log("ContextualUser: ", contextualUser);
   const classes = useStyles();
   const [userInformation, setUserInformation] = useState({})
   const [influencers, setInfluencers] = useState(influencersFromDb)
@@ -125,7 +131,7 @@ export default function Index({ influencersFromDb, offersFromDb }) {
   };
 
   //Brands...
-  if (userInformation?.type == "Brand") {
+  if (contextualUser?.type == "Brand") {
     return (
       // This is the code that BRANDS will see.
       <React.Fragment>

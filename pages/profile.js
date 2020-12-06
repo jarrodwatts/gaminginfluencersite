@@ -21,6 +21,7 @@ import 'firebase/firestore'
 import { useForm } from 'react-hook-form';
 import getImage from '../utils/helperFunctions/getImage';
 import Tabs from '@material-ui/core/Tabs';
+import LinearProgress from '@material-ui/core/LinearProgress';
 import Tab from '@material-ui/core/Tab';
 import { capitalize, convertCreationTime } from '../utils/helperFunctions/stringFormatting';
 
@@ -184,37 +185,51 @@ export default function Profile() {
     //-----End Firebase--------//
 
     async function saveUser(data) {
-        console.log(data);
-        console.log("saved")
+        console.log("Data:", data);
         initFirebase();
         let db = firebase.firestore();
         var userDocumentRef = db.collection("users").doc(userInformation.uid);
-        // Set the "type" field of the value userType
         setSaving(true)
+
+        const updateUserInfo = async (existingDocRef) => {
+
+        }
 
         try {
             await userDocumentRef.update(JSON.parse(JSON.stringify(data)));
             console.log("Document successfully updated!");
-
             //Image upload
             let storage = firebase.storage();
             let file = image;
             let storageRef = storage.ref();
             let imagesRef = storageRef.child('users');
             let usersRef = imagesRef.child(`/${userInformation.uid}.png`);
+            let existingDocRef = db.collection("users").doc(userInformation.uid);
+            
+            if (image) {
+                usersRef.put(file)
+                    .then(async () => {
+                        console.log("Uploaded profile picture")
+                        await existingDocRef.update({
+                            image: `users/${userInformation.uid}`,
+                            id: userInformation.uid //probably not required
+                        });
+                        console.log("Updated image field");
+                    })
 
-            usersRef.put(file)
-                .then(async () => {
-                    console.log("Uploaded profile picture")
-                    let existingDocRef = db.collection("users").doc(userInformation.uid);
-                    await existingDocRef.update({
-                        image: `users/${userInformation.uid}`,
-                        id: userInformation.uid //probably not required
-                    });
-                    console.log("Updated image field");
-                    setSaving(false);
-                    return setEditMode(false);
-                })
+                    
+            }
+
+            //Perform an update on the document
+            await existingDocRef.update({
+                description: data.description,
+                displayName: data.displayName,
+                socialMediaPlatforms: data.socialMediaPlatforms,
+            })
+
+            setSaving(false);
+            return setEditMode(false);
+
         }
         catch (error) {
             // The document probably doesn't exist.
@@ -330,8 +345,8 @@ export default function Profile() {
                                                         <Grid container item direction="column" alignItems="center" spacing={1}>
                                                             {Object.entries(userInformation?.socialMediaPlatforms).map((item, key) =>
                                                                 item[1] ? //Is there a value of the entry?
-                                                                    <React.Fragment>
-                                                                        <Grid container item key={key} direction="row" alignItems="center" spacing={3}>
+                                                                    <React.Fragment key={key}>
+                                                                        <Grid container item direction="row" alignItems="center" spacing={3}>
                                                                             <Grid item>
                                                                                 <SocialIcon platformName={item[0]} />
                                                                             </Grid>
@@ -426,7 +441,11 @@ export default function Profile() {
 
                                 <Grid item container direction="row" spacing={3} justify="center" alignItems="center">
                                     <Button variant="outlined" color="secondary" style={{ marginRight: '8px' }} onClick={() => setEditMode(false)}>Cancel</Button>
-                                    <Button variant="contained" color="secondary" type="submit" style={{ marginLeft: '8px' }}>Save</Button>
+                                    {!saving ?
+                                        <Button variant="contained" color="secondary" type="submit">Save</Button> :
+                                        <Button variant="contained" type="disabled">Saving...</Button>
+                                    }
+                                    {saving ? <LinearProgress color="primary" /> : null}
                                 </Grid>
 
                             </Grid>
