@@ -36,7 +36,6 @@ const useStyles = makeStyles((theme) => ({
 
 export default function AuthTwo() {
     const classes = useStyles();
-    const [username, setUsername] = useState(null);
     const [user, setUser] = useState(null);
     const [stage, setStage] = useState("Loading");
     const [region, setRegion] = React.useState('');
@@ -196,7 +195,7 @@ export default function AuthTwo() {
                         <Container className={classes.cardGrid} maxWidth="lg">
 
                             <Typography variant="h3" gutterBottom>
-                                Doing great, <b>{username}</b>...
+                                Doing great...
                             </Typography>
 
                             <Grid container direction="column" alignItems="center">

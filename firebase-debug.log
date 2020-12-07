@@ -1,0 +1,23 @@
+[debug] [2020-12-07T08:10:12.908Z] ----------------------------------------------------------------------
+[debug] [2020-12-07T08:10:12.910Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\New\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start
+[debug] [2020-12-07T08:10:12.911Z] CLI Version:   8.14.1
+[debug] [2020-12-07T08:10:12.911Z] Platform:      win32
+[debug] [2020-12-07T08:10:12.911Z] Node Version:  v14.15.1
+[debug] [2020-12-07T08:10:12.912Z] Time:          Mon Dec 07 2020 19:10:12 GMT+1100 (Australian Eastern Daylight Time)
+[debug] [2020-12-07T08:10:12.912Z] ----------------------------------------------------------------------
+[debug] [2020-12-07T08:10:12.912Z] 
+[debug] [2020-12-07T08:10:12.922Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2020-12-07T08:10:12.922Z] > authorizing via signed-in user
+[info] i  emulators: Starting emulators: functions, firestore {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: functions, firestore"}}
+[warn] !  emulators: It seems that you are running multiple instances of the emulator suite for project gaminginfluencersite. This may result in unexpected behavior. 
+[debug] [2020-12-07T08:10:12.952Z] [hub] writing locator at C:\Users\New\AppData\Local\Temp\hub-gaminginfluencersite.json
+[warn] !  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: auth, database, hosting, pubsub {"metadata":{"emulator":{"name":"functions"},"message":"The following emulators are not running, calls to these services from the Functions emulator will affect production: \u001b[1mauth, database, hosting, pubsub\u001b[22m"}}
+[warn] !  Your requested "node" version "10" doesn't match your global version "14" {"metadata":{"emulator":{"name":"functions"},"message":"Your requested \"node\" version \"10\" doesn't match your global version \"14\""}}
+[debug] [2020-12-07T08:10:12.982Z] defaultcredentials: writing to file C:\Users\New\AppData\Roaming\firebase\jarrodwatts16_gmail_com_application_default_credentials.json
+[debug] [2020-12-07T08:10:12.984Z] Setting GAC to C:\Users\New\AppData\Roaming\firebase\jarrodwatts16_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\New\\AppData\\Roaming\\firebase\\jarrodwatts16_gmail_com_application_default_credentials.json"}}
+[warn] !  firestore: Did not find a Cloud Firestore rules file specified in a firebase.json config file. {"metadata":{"emulator":{"name":"firestore"},"message":"Did not find a Cloud Firestore rules file specified in a firebase.json config file."}}
+[warn] !  firestore: The emulator will default to allowing all reads and writes. Learn more about this option: https://firebase.google.com/docs/emulator-suite/install_and_configure#security_rules_configuration. {"metadata":{"emulator":{"name":"firestore"},"message":"The emulator will default to allowing all reads and writes. Learn more about this option: https://firebase.google.com/docs/emulator-suite/install_and_configure#security_rules_configuration."}}
+[debug] [2020-12-07T08:10:12.992Z] Ignoring unsupported arg: projectId {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: projectId"}}
+[debug] [2020-12-07T08:10:12.992Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2020-12-07T08:10:12.992Z] Starting Firestore Emulator with command {"binary":"java","args":["-Duser.language=en","-jar","C:\\Users\\New\\.cache\\firebase\\emulators\\cloud-firestore-emulator-v1.11.9.jar","--host","localhost","--port",8080,"--functions_emulator","localhost:5001"],"optionalArgs":["port","webchannel_port","host","rules","functions_emulator","seed_from_export"],"joinArgs":false} {"metadata":{"emulator":{"name":"firestore"},"message":"Starting Firestore Emulator with command {\"binary\":\"java\",\"args\":[\"-Duser.language=en\",\"-jar\",\"C:\\\\Users\\\\New\\\\.cache\\\\firebase\\\\emulators\\\\cloud-firestore-emulator-v1.11.9.jar\",\"--host\",\"localhost\",\"--port\",8080,\"--functions_emulator\",\"localhost:5001\"],\"optionalArgs\":[\"port\",\"webchannel_port\",\"host\",\"rules\",\"functions_emulator\",\"seed_from_export\"],\"joinArgs\":false}"}}
+[info] i  firestore: Firestore Emulator logging to firestore-debug.log {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator logging to \u001b[1mfirestore-debug.log\u001b[22m"}}

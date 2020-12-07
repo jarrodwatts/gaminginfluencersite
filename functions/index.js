@@ -2,6 +2,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const fetch = require('node-fetch');
 const jsdom = require("jsdom");
+const puppeteer = require('puppeteer');
 
 const firebaseConfig = {
     apiKey: "AIzaSyBJpt1wi53ctf7by7Wud5K_s83vFLlfbVg",
@@ -33,6 +34,40 @@ exports.createUserDocument = functions.auth.user().onCreate((user) => {
         return null;
     }
 });
+
+
+exports.updateTwitter = functions.firestore.document('/users/{documentId}')
+    .onUpdate(async (snap, context) => {
+        const documentId = context.params.documentId;
+        const before = snap.before.data();
+        const after = snap.after.data();
+
+        const twitterUsername = after["socialMediaPlatforms"]["twitter"];
+
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
+        page.setDefaultNavigationTimeout(0);
+
+        await page.goto(`https://twitter.com/${twitterUsername}`, {
+            waitUntil: 'networkidle2',
+        });
+        page.setDefaultNavigationTimeout(0);
+
+        await page.waitForSelector(
+            '#react-root > div > div > div.css-1dbjc4n.r-18u37iz.r-13qz1uu.r-417010 > main > div > div > div > div > div > div:nth-child(2) > div > div > div:nth-child(1) > div > div.css-1dbjc4n.r-13awgt0.r-18u37iz.r-1w6e6rj > div:nth-child(2) > a > span.css-901oao.css-16my406.r-18jsvk2.r-1qd0xha.r-b88u0q.r-ad9z0x.r-bcqeeo.r-qvutc0 > span'
+            , { timeout: 0 });
+
+        const followersElement = await page.$('#react-root > div > div > div.css-1dbjc4n.r-18u37iz.r-13qz1uu.r-417010 > main > div > div > div > div > div > div:nth-child(2) > div > div > div:nth-child(1) > div > div.css-1dbjc4n.r-13awgt0.r-18u37iz.r-1w6e6rj > div:nth-child(2) > a > span.css-901oao.css-16my406.r-18jsvk2.r-1qd0xha.r-b88u0q.r-ad9z0x.r-bcqeeo.r-qvutc0 > span');
+
+        const content = await followersElement.getProperty('textContent');
+
+        const value = await content.jsonValue();
+        console.log(value);
+
+        await browser.close();
+        // works ... sometimes...
+
+    });
 
 // exports.updateInstagram = functions.firestore.document('/users/{documentId}')
 //     .onUpdate((snap, context) => {
@@ -88,30 +123,30 @@ exports.createUserDocument = functions.auth.user().onCreate((user) => {
 //             .catch((err) => functions.logger.warn(err))
 //     });
 
-exports.updateTwitter = functions.firestore.document('/users/{documentId}')
-    .onUpdate((snap, context) => {
-        const documentId = context.params.documentId;
-        const before = snap.before.data();
-        const after = snap.after.data();
+// exports.updateTwitter = functions.firestore.document('/users/{documentId}')
+//     .onUpdate((snap, context) => {
+//         const documentId = context.params.documentId;
+//         const before = snap.before.data();
+//         const after = snap.after.data();
 
-        //if twitterUsername is being added for the first time, then use after
-        const 
-            twitterUsername = 
-            before["socialMediaPlatforms"]["twitter"] ?
-            before["socialMediaPlatforms"]["twitter"] :
-            after["socialMediaPlatforms"]["twitter"]
+//         //if twitterUsername is being added for the first time, then use after
+//         const 
+//             twitterUsername = 
+//             before["socialMediaPlatforms"]["twitter"] ?
+//             before["socialMediaPlatforms"]["twitter"] :
+//             after["socialMediaPlatforms"]["twitter"]
 
 
-        functions.logger.log("Twitter: ", twitterUsername);
-        fetch(`https://www.twitter.com/${twitterUsername}`)
-            .then(res => res.text())
-            .then(
-                body => {
-                    const DOM = new jsdom.JSDOM(body);
+//         functions.logger.log("Twitter: ", twitterUsername);
+//         fetch(`https://www.twitter.com/${twitterUsername}`)
+//             .then(res => res.text())
+//             .then(
+//                 body => {
+//                     const DOM = new jsdom.JSDOM(body);
 
-                    functions.logger.log(DOM);
-                    return null;
-                })
+//                     functions.logger.log(DOM);
+//                     return null;
+//                 })
 
-            .catch((err) => functions.logger.warn(err))
-    });
+//             .catch((err) => functions.logger.warn(err))
+//     });
