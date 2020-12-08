@@ -42,30 +42,54 @@ exports.updateTwitter = functions.firestore.document('/users/{documentId}')
         const before = snap.before.data();
         const after = snap.after.data();
 
-        const twitterUsername = after["socialMediaPlatforms"]["twitter"];
+        try {
+            const twitterUsername = after["socialMediaPlatforms"]["twitter"];
 
-        const browser = await puppeteer.launch();
-        const page = await browser.newPage();
-        page.setDefaultNavigationTimeout(0);
+            const browser = await puppeteer.launch();
+            const page = await browser.newPage();
+            page.setDefaultNavigationTimeout(0);
 
-        await page.goto(`https://twitter.com/${twitterUsername}`, {
-            waitUntil: 'networkidle2',
-        });
-        page.setDefaultNavigationTimeout(0);
+            await page.goto(`https://twitter.com/${twitterUsername}`, {
+                waitUntil: 'networkidle2',
+            });
+            page.setDefaultNavigationTimeout(0);
 
-        await page.waitForSelector(
-            '#react-root > div > div > div.css-1dbjc4n.r-18u37iz.r-13qz1uu.r-417010 > main > div > div > div > div > div > div:nth-child(2) > div > div > div:nth-child(1) > div > div.css-1dbjc4n.r-13awgt0.r-18u37iz.r-1w6e6rj > div:nth-child(2) > a > span.css-901oao.css-16my406.r-18jsvk2.r-1qd0xha.r-b88u0q.r-ad9z0x.r-bcqeeo.r-qvutc0 > span'
-            , { timeout: 0 });
+            await page.waitForSelector(
+                '#react-root > div > div > div.css-1dbjc4n.r-18u37iz.r-13qz1uu.r-417010 > main > div > div > div > div > div > div:nth-child(2) > div > div > div:nth-child(1) > div > div.css-1dbjc4n.r-13awgt0.r-18u37iz.r-1w6e6rj > div:nth-child(2) > a > span.css-901oao.css-16my406.r-18jsvk2.r-1qd0xha.r-b88u0q.r-ad9z0x.r-bcqeeo.r-qvutc0 > span'
+                , { timeout: 0 });
 
-        const followersElement = await page.$('#react-root > div > div > div.css-1dbjc4n.r-18u37iz.r-13qz1uu.r-417010 > main > div > div > div > div > div > div:nth-child(2) > div > div > div:nth-child(1) > div > div.css-1dbjc4n.r-13awgt0.r-18u37iz.r-1w6e6rj > div:nth-child(2) > a > span.css-901oao.css-16my406.r-18jsvk2.r-1qd0xha.r-b88u0q.r-ad9z0x.r-bcqeeo.r-qvutc0 > span');
+            const followersElement = await page.$('#react-root > div > div > div.css-1dbjc4n.r-18u37iz.r-13qz1uu.r-417010 > main > div > div > div > div > div > div:nth-child(2) > div > div > div:nth-child(1) > div > div.css-1dbjc4n.r-13awgt0.r-18u37iz.r-1w6e6rj > div:nth-child(2) > a > span.css-901oao.css-16my406.r-18jsvk2.r-1qd0xha.r-b88u0q.r-ad9z0x.r-bcqeeo.r-qvutc0 > span');
 
-        const content = await followersElement.getProperty('textContent');
+            const content = await followersElement.getProperty('textContent');
 
-        const value = await content.jsonValue();
-        console.log(value);
+            const value = await content.jsonValue();
+            console.log(value);
 
-        await browser.close();
-        // works ... sometimes...
+            await browser.close();
+            // works ... sometimes...
+            // Create an initial document to update.
+            var userDocRef = admin
+                .firestore()
+                .collection('users')
+                .doc(documentId);
+
+            // To update age and favorite color:
+            await userDocRef.update(
+                {
+                    socialMediaStats: {
+                        twitter: {
+                            "followers": value,
+                        }
+                    }
+                }
+            )
+
+            console.log("Updated Successfully.")
+
+        }
+        catch (error) {
+            console.log("Couldn't get statistics for platform: Twitter:", error)
+        }
 
     });
 
