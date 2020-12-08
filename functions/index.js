@@ -35,63 +35,107 @@ exports.createUserDocument = functions.auth.user().onCreate((user) => {
     }
 });
 
+// Social Media Selector Constants
+const selectors = {
+    instagram: '#react-root > section > main > div > header > section > ul > li:nth-child(2) > a > span',
+    twitter: '#react-root > div > div > div.css-1dbjc4n.r-18u37iz.r-13qz1uu.r-417010 > main > div > div > div > div > div > div:nth-child(2) > div > div > div:nth-child(1) > div > div.css-1dbjc4n.r-13awgt0.r-18u37iz.r-1w6e6rj > div:nth-child(2) > a > span.css-901oao.css-16my406.r-18jsvk2.r-1qd0xha.r-b88u0q.r-ad9z0x.r-bcqeeo.r-qvutc0 > span',
+}
 
 exports.updateTwitter = functions.firestore.document('/users/{documentId}')
     .onUpdate(async (snap, context) => {
-        const documentId = context.params.documentId;
-        const before = snap.before.data();
-        const after = snap.after.data();
+        await performSocialUpdate("twitter", "twitter.com", snap, context);
+    });
 
+exports.updateInstagram = functions.firestore.document('/users/{documentId}')
+    .onUpdate(async (snap, context) => {
+        await performSocialUpdate("instagram", "instagram.com", snap, context);
+    });
+
+
+async function performSocialUpdate(platform, platformUrl, snap, context) {
+    const documentId = context.params.documentId;
+    const before = snap.before.data();
+    const after = snap.after.data();
+
+    if (before !== after) {
+        console.log("Updating", platform);
         try {
-            const twitterUsername = after["socialMediaPlatforms"]["twitter"];
+            let username = null;
 
-            const browser = await puppeteer.launch();
-            const page = await browser.newPage();
-            page.setDefaultNavigationTimeout(0);
+            if (after && after["socialMediaPlatforms"] && after["socialMediaPlatforms"][platform]) {
+                username = after["socialMediaPlatforms"][platform];
+            }
 
-            await page.goto(`https://twitter.com/${twitterUsername}`, {
-                waitUntil: 'networkidle2',
-            });
-            page.setDefaultNavigationTimeout(0);
-
-            await page.waitForSelector(
-                '#react-root > div > div > div.css-1dbjc4n.r-18u37iz.r-13qz1uu.r-417010 > main > div > div > div > div > div > div:nth-child(2) > div > div > div:nth-child(1) > div > div.css-1dbjc4n.r-13awgt0.r-18u37iz.r-1w6e6rj > div:nth-child(2) > a > span.css-901oao.css-16my406.r-18jsvk2.r-1qd0xha.r-b88u0q.r-ad9z0x.r-bcqeeo.r-qvutc0 > span'
-                , { timeout: 0 });
-
-            const followersElement = await page.$('#react-root > div > div > div.css-1dbjc4n.r-18u37iz.r-13qz1uu.r-417010 > main > div > div > div > div > div > div:nth-child(2) > div > div > div:nth-child(1) > div > div.css-1dbjc4n.r-13awgt0.r-18u37iz.r-1w6e6rj > div:nth-child(2) > a > span.css-901oao.css-16my406.r-18jsvk2.r-1qd0xha.r-b88u0q.r-ad9z0x.r-bcqeeo.r-qvutc0 > span');
-
-            const content = await followersElement.getProperty('textContent');
-
-            const value = await content.jsonValue();
-            console.log(value);
-
-            await browser.close();
-            // works ... sometimes...
-            // Create an initial document to update.
-            var userDocRef = admin
-                .firestore()
-                .collection('users')
-                .doc(documentId);
-
-            // To update age and favorite color:
-            await userDocRef.update(
-                {
-                    socialMediaStats: {
-                        twitter: {
-                            "followers": value,
-                        }
+            if (username) {
+                const followers = await scrapeFollowers(platformUrl, username, selectors[platform]);
+                const existingFollowers = after["socialMediaPlatforms"][platform]
+                // If follower amount is not the same as previously, (avoid endless loop) - This still runs twice...
+                if (followers !== existingFollowers) {
+                    const isUpdateSuccess = await updateFollowersInDb(platform, followers, documentId);
+                    if (isUpdateSuccess === true) {
+                        console.log("Update Successful on platform", platform);
+                    }
+                    else {
+                        console.log(isUpdateSuccess); // Console logs an error message
                     }
                 }
-            )
-
-            console.log("Updated Successfully.")
-
+            }
+            else {
+                console.log("No", platform, "username available, skipping", platform)
+            }
         }
         catch (error) {
-            console.log("Couldn't get statistics for platform: Twitter:", error)
+            console.log("Couldn't get statistics for platform:", platform, "Reason:", error)
         }
+    }
+}
 
+async function scrapeFollowers(platformUrl, username, selector) {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    page.setDefaultNavigationTimeout(0);
+
+    await page.goto(`https://${platformUrl}/${username}`, {
+        waitUntil: 'networkidle2',
     });
+    page.setDefaultNavigationTimeout(0);
+
+    await page.waitForSelector(
+        selector
+        , { timeout: 0 });
+
+    const followersElement = await page.$(selector);
+
+    const content = await followersElement.getProperty('textContent');
+
+    const value = await content.jsonValue();
+    await browser.close();
+
+    return value;
+}
+
+async function updateFollowersInDb(platform, followers, documentId) {
+    var userDocRef = admin
+        .firestore()
+        .collection('users')
+        .doc(documentId);
+
+    try {
+        await userDocRef.update(
+            {
+                socialMediaStats: {
+                    [platform]: {
+                        "followers": followers,
+                    }
+                }
+            }
+        )
+        return true;
+    }
+    catch (error) {
+        return error;
+    }
+}
 
 // exports.updateInstagram = functions.firestore.document('/users/{documentId}')
 //     .onUpdate((snap, context) => {
