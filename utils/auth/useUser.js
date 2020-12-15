@@ -29,11 +29,13 @@ const useUser = () => {
 
   useEffect(() => {
     const cookie = cookies.get('auth')
+
     if (!cookie) {
       //BELOW: This forces redirect to login when user is not logged in and tries to access a page.
       //router.push('/')
       return
     }
+
     setUser(JSON.parse(cookie))
 
   }, [])
