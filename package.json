@@ -4,19 +4,33 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "jest"
   },
   "dependencies": {
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
     "firebase": "^7.15.5",
     "firebase-admin": "^8.12.1",
+    "firebase-functions": "^3.9.0",
+    "isomorphic-unfetch": "^3.0.0",
     "js-cookie": "2.2.1",
-    "next": "latest",
+    "next": "^10.0.3",
+    "puppeteer": "^5.5.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "react-dropzone": "^11.0.3",
+    "react-firebase-hooks": "^2.2.0",
     "react-firebaseui": "4.1.0",
     "react-hook-form": "^6.0.8",
-    "swr": "0.2.3"
+    "react-player": "^2.6.0",
+    "react-twitch-embed": "^2.1.0",
+    "recharts": "^1.8.5",
+    "swr": "0.2.3",
+    "xhr2": "^0.2.0",
+    "xmlhttprequest": "^1.8.0"
+  },
+  "devDependencies": {
+    "jest": "^26.5.3"
   }
 }

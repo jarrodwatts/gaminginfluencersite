@@ -5,10 +5,11 @@ import firebase from 'firebase/app'
 import 'firebase/auth'
 import initFirebase from '../auth/initFirebase'
 
-initFirebase()
+initFirebase();
 
 const useUser = () => {
-  const [user, setUser] = useState()
+  const [user, setUser] = useState();
+  const [userDocument, setUserDocument] = useState();
   const router = useRouter()
 
   const logout = async () => {
@@ -39,7 +40,27 @@ const useUser = () => {
 
   }, [])
 
-  return { user, logout }
+  useEffect(() => {
+    const getUserDetails = async () => {
+      const cookie = cookies.get('auth');
+      if (cookie) {
+        //If there's a auth cookie present (user logged in), parse it.
+        const parsedCookie = JSON.parse(cookie);
+
+        //Open up a firestore connection
+        initFirebase();
+        const db = firebase.firestore();
+
+        //Ask for the user's user document data
+        const userDocRef = db.collection('users').doc(parsedCookie.id);
+        const userDocData = await userDocRef.get();
+        setUserDocument(userDocData.data());
+      }
+    }
+    getUserDetails();
+  }, [])
+
+  return { user, userDocument, logout }
 }
 
 export { useUser }
