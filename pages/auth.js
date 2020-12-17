@@ -3,7 +3,8 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
-import FirebaseAuth from '../components/FirebaseAuth'
+import FirebaseAuth from '../components/FirebaseAuth';
+import Image from 'next/image';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -34,18 +35,29 @@ const useStyles = makeStyles((theme) => ({
   submit: {
     margin: theme.spacing(3, 0, 2),
   },
+  bgWrap: {
+    zIndex: -1,
+  },
 }));
 
 export default function SignInSide() {
   const classes = useStyles();
 
   return (
-    <Grid container component="main" className={classes.root}>
-      <CssBaseline />
-      <Grid item xs={false} sm={4} md={7} className={classes.image} />
-      <Grid container item xs={12} sm={8} md={5} component={Paper} elevation={6} justify="center" alignItems="center">
+    <Grid container component="main" className={classes.root} alignItems="center" justify="center">
+      <Image
+        src="/signUpBackground.jpg"
+        alt="Random Image"
+        layout="fill"
+        objectFit="cover"
+        quality={100}
+        className={classes.bgWrap}
+      />
+
+      <Grid container item xs={12} sm={8} md={5} component={Paper} elevation={6} justify="center" alignItems="center" style={{ paddingTop: '96px', paddingBottom: '96px', }}>
         <FirebaseAuth />
       </Grid>
+
     </Grid>
   );
 }

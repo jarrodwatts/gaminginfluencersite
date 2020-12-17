@@ -23,3 +23,7 @@ export const displayRegion = (region) => {
     }
     return (mapper[region])
 }
+
+export const capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+}

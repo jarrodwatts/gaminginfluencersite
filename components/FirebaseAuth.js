@@ -44,7 +44,7 @@ const firebaseAuthConfig = {
     },
 
   ],
-  signInSuccessUrl: '/authTwo',
+  signInSuccessUrl: '/setup',
   credentialHelper: 'none',
   callbacks: {
     signInSuccessWithAuthResult: async ({ user }, redirectUrl) => {
