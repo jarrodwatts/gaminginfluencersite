@@ -86,10 +86,10 @@ export default function Setup() {
             if (res?.type) {
                 console.log(res.type)
                 // TODO: UNCOMMENT THIS
-                //router.push('/profile');
+                router.push('/profile');
 
                 // TODO: DELTE THIS
-                setStage(3)
+                //setStage(3)
             }
             else {
                 setStage(1)

@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
         height: theme.spacing(14),
     },
     card: {
-        minHeight: '320px',
+        minHeight: '280px',
     }
 }));
 
@@ -43,28 +43,44 @@ export default function InfluencerCard(props) {
             initFirebase();
             fetchImage()
         }
+        else {
+            setInfluencerImage('default')
+        }
     }, [props.image])
-    
+
     return (
         <Card className={classes.card}>
             <Link color="inherit" href={`/profile/${props.uid}`} underline="none">
                 <Grid container direction="column" alignItems="center" >
-                    {/* Cover Image */}
+
+                    {/* Cover Image
                     <Grid item>
                         {influencerImage ? <img src={influencerImage}
                             style={{ maxHeight: '96px', backgroundSize: 'cover', objectFit: 'cover', width: '100%', }} />
                             : <CircularProgress color="primary" style={{ marginTop: '8px' }} />}
-                    </Grid>
+                    </Grid> */}
 
                     <Grid item>
                         {/* Profile Image */}
-                        {influencerImage ? <Avatar src={influencerImage} className={classes.avatarSize}
-                            style={{
-                                borderStyle: 'solid',
-                                borderWidth: '2px',
-                                borderColor: "#fff",
-                            }} />
-                            : <CircularProgress color="primary" style={{ marginTop: '8px' }} />}
+                        {(influencerImage && (influencerImage != "default")) ?
+                            <Avatar src={influencerImage} className={classes.avatarSize}
+                                style={{
+                                    borderStyle: 'solid',
+                                    borderWidth: '2px',
+                                    borderColor: "#fff",
+                                    marginTop: '16px'
+                                }} />
+                            :
+                            influencerImage == "default" ?
+                                <Avatar className={classes.avatarSize}
+                                    style={{
+                                        borderStyle: 'solid',
+                                        borderWidth: '2px',
+                                        borderColor: "#fff",
+                                        marginTop: '16px'
+                                    }} />
+                                :
+                                <CircularProgress color="primary" style={{ marginTop: '8px' }} />}
                     </Grid>
 
                     {/* Display Name */}

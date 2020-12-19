@@ -11,11 +11,14 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import initFirebase from '../utils/auth/initFirebase';
+import Link from '@material-ui/core/Link';
 import { Divider } from '@material-ui/core';
 import RoomIcon from '@material-ui/icons/Room';
 import EmojiPeopleIcon from '@material-ui/icons/EmojiPeople';
+import WcIcon from '@material-ui/icons/Wc';
 import { useDropzone } from 'react-dropzone';
 import firebase from 'firebase/app'
+import { useRouter } from 'next/router'
 import 'firebase/auth'
 import 'firebase/firestore'
 import { useForm } from 'react-hook-form';
@@ -88,6 +91,7 @@ export default function Profile() {
     const [image, setImage] = useState(null);
     const [saving, setSaving] = useState(false);
     const [userImage, setUserImage] = useState(null)
+    const router = useRouter()
 
     function StyledDropzone() {
 
@@ -176,6 +180,8 @@ export default function Profile() {
 
             }
             else {
+                // Redirect them to /auth
+                router.push('/auth')
                 setUserInformation({})
                 console.log("Loading")
             }
@@ -205,7 +211,7 @@ export default function Profile() {
             let imagesRef = storageRef.child('users');
             let usersRef = imagesRef.child(`/${userInformation.uid}.png`);
             let existingDocRef = db.collection("users").doc(userInformation.uid);
-            
+
             if (image) {
                 usersRef.put(file)
                     .then(async () => {
@@ -216,8 +222,6 @@ export default function Profile() {
                         });
                         console.log("Updated image field");
                     })
-
-                    
             }
 
             //Perform an update on the document
@@ -238,6 +242,7 @@ export default function Profile() {
     }
 
     console.log("user image:", userImage)
+
     return (
         !editMode ?
             (
@@ -246,148 +251,136 @@ export default function Profile() {
                     <NavBar />
 
                     <main>
-                        <Container className={classes.cardGrid} maxWidth="lg">
-                            <Grid container alignItems="center" justify="center" style={{ marginBottom: '64px' }}>
-                                <Grid container direction="row" justify="flex-end" style={{ marginBottom: '16px' }}>
-                                    <Button
-                                        variant="contained"
-                                        color="secondary"
-                                        onClick={() => { setEditMode(true); }}>
-                                        Edit Profile
+                        <Container className={classes.cardGrid} maxWidth="md">
+
+                            <Grid container direction="row" justify="flex-end" style={{ marginBottom: '16px' }}>
+                                <Button
+                                    variant="contained"
+                                    color="secondary"
+                                    onClick={() => { setEditMode(true); }}>
+                                    Edit Profile
                                     </Button>
+                            </Grid>
+
+                            <Grid container direction="row" alignItems="center" justify="center" spacing={3} style={{ marginBottom: '32px', }}>
+
+                                <Grid item xs={12} sm={6} md={3}>
+                                    <Avatar src={userImage}
+                                        style={{
+                                            // position: 'absolute',
+                                            // bottom: '45%',
+                                            borderStyle: 'solid',
+                                            borderWidth: '5px',
+                                            borderColor: "#556cd6", //primary
+                                        }} className={classes.large} />
+                                </Grid>
+                                <Grid container item direction="column" xs={12} sm={6} md={9} spacing={2}>
+                                    <Grid item>
+                                        {/* Name */}
+                                        <Typography color="primary" variant="h3"><b>{userInformation?.displayName}</b></Typography>
+                                    </Grid>
+                                    <Grid item style={{ marginLeft: '8px' }}>
+                                        {/* Bio / Description */}
+                                        <Typography variant="h5">{userInformation?.bio}</Typography>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+
+                            <Divider style={{ marginBottom: '16px' }} />
+
+                            <Grid container direction="row" alignItems="baseline" justify="center" spacing={3}>
+                                <Grid container item direction="column" xs={3} spacing={1}>
+
+                                    <Grid container item direction="row" spacing={1}>
+                                        <Grid item>
+                                            <WcIcon color="primary" style={{ marginRight: '4px' }} />
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography>Identifies as <b>{capitalize(userInformation?.gender)}</b></Typography>
+                                        </Grid>
+                                    </Grid>
+
+                                    <Grid container item direction="row" spacing={1}>
+                                        <Grid item>
+                                            <RoomIcon color="primary" style={{ marginRight: '4px' }} />
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography>From <b>{capitalize(userInformation?.region)}</b></Typography>
+                                        </Grid>
+                                    </Grid>
+
+                                    <Grid container item direction="row" spacing={1}>
+                                        <Grid item>
+                                            <EmojiPeopleIcon color="primary" style={{ marginRight: '4px' }} />
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography>Joined <b>{convertCreationTime(userInformation?.metadata?.creationTime)}</b></Typography>
+                                        </Grid>
+                                    </Grid>
+
                                 </Grid>
 
-                                <img src={userImage}
-                                    alt="Random Image"
-                                    height="280px"
-                                    width="100%"
-                                    style={{ marginBottom: '16px', backgroundSize: 'cover', objectFit: 'cover', }} // makes it zoom, not stretch
-                                />
+                                <Divider orientation="vertical" flexItem />
 
-                                <Avatar src={userImage}
-                                    style={{
-                                        position: 'absolute',
-                                        bottom: '45%',
-                                        borderStyle: 'solid',
-                                        borderWidth: '5px',
-                                        borderColor: "#556cd6", //primary
-                                    }} className={classes.large} />
+                                <Grid container direction="column" item xs={8} spacing={3} style={{ marginLeft: '16px' }}>
 
-                            </Grid>
+                                    <Grid container item direction="column" spacing={0}>
+                                        <Grid item>
+                                            <Typography color="primary" variant="h5">About {userInformation?.displayName}</Typography>
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography variant="body1">{userInformation?.description}</Typography>
+                                        </Grid>
 
-                            <Grid container alignItems="center" justify="center" direction="column" style={{ marginBottom: '32px' }}>
-                                {/* Name */}
-                                <Typography variant="h3">{userInformation.displayName}</Typography>
-                                {/* Bio / Description */}
-                                <Typography variant="h5">{userInformation.description}</Typography>
+                                    </Grid>
 
-                            </Grid>
-                            <Divider style={{ marginBottom: '16px' }} />
-                            <Grid container alignItems="center" justify="center" direction="column" style={{ marginBottom: '16px' }}>
-                                <Tabs
-                                    value={value}
-                                    onChange={handleChange}
-                                    indicatorColor="primary"
-                                    textColor="primary"
-                                    centered
-                                >
-                                    <Tab label="Overview" />
-                                    <Tab label="Social Media" />
-                                    <Tab label="Contact" />
-                                </Tabs>
-                            </Grid>
+                                    <Grid container item spacing={0}>
+                                        <Typography color="primary" variant="h5">{userInformation?.displayName}'s Social Media Profiles:</Typography>
 
-                            <Container maxWidth="md">
-                                <Grid container justify="space-between" alignItems="center" direction="row" spacing={3}>
-                                    {/* Overview */}
-                                    {value == 0 ?
-                                        <React.Fragment>
-                                            <Grid item xs={4}>
-                                                <Grid item>
-                                                    <Grid container item direction="row">
-                                                        <Grid item>
-                                                            <RoomIcon color="primary" style={{ marginRight: '4px' }} />
-                                                        </Grid>
-                                                        <Grid item>
-                                                            <Typography>From <b>{capitalize(userInformation?.region)}</b></Typography>
-                                                        </Grid>
-                                                    </Grid>
+                                        <Grid container direction="row" item spacing={2} style={{ marginTop: '8px' }} xs={12} spacing={3}>
+                                            {
 
-                                                    <Grid container item direction="row">
-                                                        <Grid item>
-                                                            <EmojiPeopleIcon color="primary" style={{ marginRight: '4px' }} />
-                                                        </Grid>
-                                                        <Grid item>
-                                                            <Typography>Member Since  <b>{convertCreationTime(userInformation?.metadata?.creationTime)}</b></Typography>
-                                                        </Grid>
-                                                    </Grid>
-                                                </Grid>
-                                            </Grid>
+                                                userInformation?.socialMediaPlatforms ?
+                                                    Object.entries(userInformation.socialMediaPlatforms).map(([socialName, socialValue]) =>
 
-                                            <Divider orientation="vertical" flexItem />
+                                                        socialValue ?
+                                                            <Grid container item direction="row" alignItems="center" justify="center" spacing={2} key={socialName} md={3} sm={4} xs={12}>
+                                                                <Paper className={classes.paper} style={{ minWidth: '112px', maxWidth: '112px', minHeight: '96px' }}>
 
-                                            <Grid item xs={7}>
-                                                <Grid container direction="row" justify="space-between" alignItems="center" spacing={2}>
-                                                    <Grid item >
-                                                        what values they uphold and why a brand would use them
-                                                    </Grid>
-                                                </Grid>
-                                            </Grid>
-                                        </React.Fragment>
-                                        : null}
-
-                                    {/* Socials */}
-                                    {value == 1 ?
-                                        <React.Fragment>
-                                            <Container maxWidth="sm">
-                                                <Grid container direction="row" justify="space-between" alignItems="center" spacing={2}>
-                                                    <Grid item xs={5}>
-                                                        <Grid container item direction="column" alignItems="center" spacing={1}>
-                                                            {Object.entries(userInformation?.socialMediaPlatforms).map((item, key) =>
-                                                                item[1] ? //Is there a value of the entry?
-                                                                    <React.Fragment key={key}>
-                                                                        <Grid container item direction="row" alignItems="center" spacing={3}>
+                                                                    {/* TODO: This href/ is not going to work for tik tok - it requires an @ */}
+                                                                    <Link href={`//www.${socialName}.com/${socialValue}`} underline="none" color="textSecondary">
+                                                                        <Grid container direction="column" alignItems="center" justify="center" spacing={1}>
                                                                             <Grid item>
-                                                                                <SocialIcon platformName={item[0]} />
+                                                                                <Avatar
+                                                                                    alt={socialName}
+                                                                                    src={`/assets/${socialName}.png`}
+                                                                                />
                                                                             </Grid>
 
                                                                             <Grid item>
-                                                                                <Typography>{capitalize(item[1])}</Typography>
+                                                                                <Typography>{socialValue}</Typography>
                                                                             </Grid>
                                                                         </Grid>
-                                                                        <Divider style={{ "width": '45%' }}></Divider>
-                                                                    </React.Fragment>
+                                                                    </Link>
+                                                                </Paper>
+                                                            </Grid> : null
 
-                                                                    : null
-                                                            )}
+                                                    )
+                                                    :
+                                                    <Typography>😞 You haven't told us your social media usernames yet.</Typography>
+                                            }
+                                        </Grid>
 
-                                                        </Grid>
-                                                    </Grid>
+                                    </Grid>
 
-                                                    <Divider orientation="vertical" flexItem />
-
-                                                    <Grid item xs={6}>
-                                                        how they use their social media platforms to appeal to their audience
-                                                    </Grid>
-                                                </Grid>
-                                            </Container>
-                                        </React.Fragment>
-
-                                        : null}
-
-                                    {/* Contact */}
-                                    {value == 2 ?
-                                        <React.Fragment>
-                                        </React.Fragment>
-
-                                        : null}
                                 </Grid>
-                            </Container>
+
+                            </Grid>
 
                         </Container>
                     </main>
 
-                </React.Fragment>
+                </React.Fragment >
             )
             :
             <React.Fragment>
@@ -422,7 +415,7 @@ export default function Profile() {
                                 </Grid>
 
                                 {/* Social Media Platforms */}
-                                <Typography color="primary" variant="h5" gutterBottom>Social Media Links</Typography>
+                                <Typography color="primary" variant="h5" gutterBottom>Social Media Usernames</Typography>
                                 <Grid item >
                                     <TextField type="text" label="Twitch Username" name="socialMediaPlatforms.twitch" defaultValue={userInformation?.socialMediaPlatforms?.twitch ? userInformation?.socialMediaPlatforms?.twitch : null} inputRef={register} />
                                     <TextField type="text" label="YouTube Username" name="socialMediaPlatforms.youtube" defaultValue={userInformation?.socialMediaPlatforms?.youtube ? userInformation?.socialMediaPlatforms?.youtube : null} inputRef={register} />

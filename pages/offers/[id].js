@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
@@ -21,6 +21,7 @@ import 'firebase/storage';
 import initFirebase from '../../utils/auth/initFirebase';
 import getImage from '../../utils/helperFunctions/getImage';
 import { convertDate } from '../../utils/helperFunctions/stringFormatting';
+import UserContext from '../../utils/auth/UserContext';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -48,6 +49,9 @@ const useStyles = makeStyles((theme) => ({
 
 
 export default function Offer({ offer, applicants }) {
+
+    const contextualUser = useContext(UserContext);
+
     const classes = useStyles();
     const [offerImage, setOfferImage] = useState(null)
     const [firebaseUserInformation, setUserInformation] = useState({})
@@ -203,20 +207,23 @@ export default function Offer({ offer, applicants }) {
                                     </div>
 
                                     {/* Apply Button */}
-                                    {!alreadyApplied ?
-                                        <Button
-                                            onClick={() => { handleApply() }}
-                                            variant="contained"
-                                            color="primary">
-                                            Apply for Offer
-                                        </Button>
-                                        :
-                                        <Button
-                                            onClick={() => { handleApply() }}
-                                            variant="contained"
-                                            color="secondary">
-                                            Withdraw Application
-                                        </Button>
+                                    {
+                                        contextualUser ?
+                                            !alreadyApplied ?
+                                                <Button
+                                                    onClick={() => { handleApply() }}
+                                                    variant="contained"
+                                                    color="primary">
+                                                    Apply for Offer
+                                                </Button>
+                                                :
+                                                <Button
+                                                    onClick={() => { handleApply() }}
+                                                    variant="contained"
+                                                    color="secondary">
+                                                    Withdraw Application
+                                                </Button>
+                                            : null
                                     }
 
 

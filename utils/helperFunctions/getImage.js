@@ -12,6 +12,7 @@ export default async function getImage(path) {
             })
             .catch((error) => {
                 reject(error)
+                console.log(error);
             });
     })
 }
