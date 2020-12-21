@@ -168,16 +168,16 @@ export default function Profile() {
         firebase.auth().onAuthStateChanged(async (user) => {
             if (user) {
                 let db = firebase.firestore();
-                const userDoc = db.collection('users').doc(user.uid);
-                const userDocGet = await userDoc.get();
-
-                if (userDocGet.exists) {
-                    const userDocData = userDocGet.data();
-                    console.log("userDocData", userDocData)
-                    setUserInformation(userDocData)
-                    return fetchImage(userDocData.image)
-                }
-
+                db.collection('users').doc(user.uid)
+                    // Listen for live updates
+                    .onSnapshot(async (doc) => {
+                        if (doc.exists) {
+                            const userDocData = doc.data();
+                            console.log("userDocData", userDocData)
+                            setUserInformation(userDocData)
+                            return fetchImage(userDocData.image)
+                        }
+                    })
             }
             else {
                 // Redirect them to /auth
@@ -219,10 +219,24 @@ export default function Profile() {
                         await existingDocRef.update({
                             image: `users/${userInformation.uid}`,
                             id: userInformation.uid //probably not required
-                        });
+                        })
+
                         console.log("Updated image field");
+                        // Hack: Refresh image manually if the image was updated
+                        const exDoc = await existingDocRef.get()
+                            .then(async (doc) => {
+                                const data = doc.data();
+                                // Now the new image is available...
+                                // We need to re-fetch the image?
+                                const res = await getImage(data.image)
+                                return setUserImage(res);
+                            });
+
                     })
             }
+
+            // TODO: this is inefficiently calling two updates 
+            // when the user wants to update their image
 
             //Perform an update on the document
             await existingDocRef.update({
@@ -232,6 +246,13 @@ export default function Profile() {
             })
 
             setSaving(false);
+
+            // Case where user comes back to edit previous image in same load,
+            // We need to clear state of the image being displayed 
+            // Otherwise it isn't available to edit.
+            setFilePreview(null);
+
+            // Then send them back to view their profile changes
             return setEditMode(false);
 
         }

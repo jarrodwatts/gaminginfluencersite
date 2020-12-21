@@ -378,7 +378,7 @@ export default function Setup() {
 
                                     <Grid container direction="column" alignItems="center" justify="center" item xs={12} spacing={1}>
                                         <Grid item xs={12}>
-                                            <Typography variant="h3">So, {user.displayName ? user.displayName : "there!"}</Typography>
+                                            <Typography variant="h3">So, {user?.displayName}</Typography>
                                         </Grid>
                                         <Grid item xs={12} >
                                             <Typography style={{ marginTop: '4px' }}>Where can we find you on your socials? 👀</Typography>
