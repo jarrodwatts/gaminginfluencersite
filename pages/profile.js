@@ -10,7 +10,9 @@ import Paper from '@material-ui/core/Paper';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import initFirebase from '../utils/auth/initFirebase';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import InputLabel from '@material-ui/core/InputLabel';
 import Link from '@material-ui/core/Link';
 import { Divider } from '@material-ui/core';
 import RoomIcon from '@material-ui/icons/Room';
@@ -23,10 +25,13 @@ import 'firebase/auth'
 import 'firebase/firestore'
 import { useForm } from 'react-hook-form';
 import getImage from '../utils/helperFunctions/getImage';
+import SportsEsportsIcon from '@material-ui/icons/SportsEsports';
 import Tabs from '@material-ui/core/Tabs';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import Tab from '@material-ui/core/Tab';
+import initFirebase from '../utils/auth/initFirebase';
 import { capitalize, convertCreationTime } from '../utils/helperFunctions/stringFormatting';
+import { socials } from '../utils/helperFunctions/constants';
 
 const useStyles = makeStyles((theme) => ({
 
@@ -52,6 +57,10 @@ const useStyles = makeStyles((theme) => ({
         width: theme.spacing(24),
         height: theme.spacing(24),
     },
+    imagePreview: {
+        width: 200,
+        height: 200,
+    }
 }));
 
 //---Start Drag n Drop---\\
@@ -91,6 +100,7 @@ export default function Profile() {
     const [image, setImage] = useState(null);
     const [saving, setSaving] = useState(false);
     const [userImage, setUserImage] = useState(null)
+    const [gender, setGender] = useState(userInformation.gender ? userInformation.gender : "male");
     const router = useRouter()
 
     function StyledDropzone() {
@@ -149,6 +159,10 @@ export default function Profile() {
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
+    };
+
+    const handleChangeGender = (event) => {
+        setGender(event.target.value)
     };
 
     //Form Editor
@@ -241,6 +255,8 @@ export default function Profile() {
             //Perform an update on the document
             await existingDocRef.update({
                 description: data.description,
+                gender: gender,
+                category: data.category,
                 displayName: data.displayName,
                 socialMediaPlatforms: data.socialMediaPlatforms,
             })
@@ -311,6 +327,15 @@ export default function Profile() {
 
                             <Grid container direction="row" alignItems="baseline" justify="center" spacing={3}>
                                 <Grid container item direction="column" xs={3} spacing={1}>
+
+                                    <Grid container item direction="row" spacing={1}>
+                                        <Grid item>
+                                            <SportsEsportsIcon color="primary" style={{ marginRight: '4px' }} />
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography><b>{capitalize(userInformation?.category)}</b></Typography>
+                                        </Grid>
+                                    </Grid>
 
                                     <Grid container item direction="row" spacing={1}>
                                         <Grid item>
@@ -401,7 +426,7 @@ export default function Profile() {
                         </Container>
                     </main>
 
-                </React.Fragment >
+                </React.Fragment>
             )
             :
             <React.Fragment>
@@ -411,55 +436,126 @@ export default function Profile() {
                 <main>
                     <form onSubmit={handleSubmit(onSubmit)} className={classes.form}>
 
-                        <Container className={classes.cardGrid} maxWidth="lg">
-                            <Grid container direction="column" alignItems="center" justify="center">
+                        <Container className={classes.cardGrid} maxWidth="md">
+                            <Grid container direction="row" spacing={3}>
 
-                                {/* Cover Photo */}
-                                <Typography color="primary" variant="h5" gutterBottom>Profile Image</Typography>
-                                <Grid item style={{ marginBottom: '32px' }}>
-                                    {filePreview ?
-                                        <img
-                                            src={filePreview[0].preview}
-                                            style={{
-                                                maxHeight: '200px'
-                                            }}
-                                        /> :
-                                        <StyledDropzone />
-                                    }
-                                </Grid>
+                                <Grid container direction="column" alignItems="center" item xs={5} spacing={2}>
+                                    <Grid item>
+                                        <Typography color="primary" variant="h5" gutterBottom>Profile Image</Typography>
+                                    </Grid>
+                                    <Grid item>
+                                        {filePreview ?
+                                            <Grid container direction="column" alignItems="center" justify="center" spacing={2}>
+                                                <Grid item>
+                                                    <Avatar
+                                                        className={classes.imagePreview}
+                                                        src={filePreview[0].preview}
+                                                        style={{
+                                                            maxHeight: '200px',
+                                                            borderStyle: 'solid',
+                                                            borderWidth: '2px',
+                                                            borderColor: "#fff",
 
-                                {/* About You */}
-                                <Typography color="primary" variant="h5" gutterBottom>About You</Typography>
-                                <Grid item style={{ marginBottom: '32px' }}>
-                                    <TextField type="text" label="Display Name" name="displayName" defaultValue={userInformation.displayName ? userInformation.displayName : null} inputRef={register} />
-                                    <TextField type="text" label="Your Description" name="description" defaultValue={userInformation.description ? userInformation.description : null} inputRef={register} multiline />
-                                </Grid>
-
-                                {/* Social Media Platforms */}
-                                <Typography color="primary" variant="h5" gutterBottom>Social Media Usernames</Typography>
-                                <Grid item >
-                                    <TextField type="text" label="Twitch Username" name="socialMediaPlatforms.twitch" defaultValue={userInformation?.socialMediaPlatforms?.twitch ? userInformation?.socialMediaPlatforms?.twitch : null} inputRef={register} />
-                                    <TextField type="text" label="YouTube Username" name="socialMediaPlatforms.youtube" defaultValue={userInformation?.socialMediaPlatforms?.youtube ? userInformation?.socialMediaPlatforms?.youtube : null} inputRef={register} />
-                                </Grid>
-                                <Grid item>
-                                    <TextField type="text" label="Twitter Username" name="socialMediaPlatforms.twitter" defaultValue={userInformation?.socialMediaPlatforms?.twitter ? userInformation?.socialMediaPlatforms?.twitter : null} inputRef={register} />
-                                    <TextField type="text" label="Facebook Username" name="socialMediaPlatforms.facebook" defaultValue={userInformation?.socialMediaPlatforms?.facebook ? userInformation?.socialMediaPlatforms?.facebook : null} inputRef={register} />
-                                </Grid>
-                                <Grid item>
-                                    <TextField type="text" label="Instagram Username" name="socialMediaPlatforms.instagram" defaultValue={userInformation?.socialMediaPlatforms?.instagram ? userInformation?.socialMediaPlatforms?.instagram : null} inputRef={register} />
-                                    <TextField type="url" label="Blog Url" name="socialMediaPlatforms.blog" defaultValue={userInformation?.socialMediaPlatforms?.blog ? userInformation?.socialMediaPlatforms?.blog : null} inputRef={register} />
-                                </Grid>
-                                <Grid item style={{ marginBottom: '32px' }}>
-                                    <TextField type="text" label="TikTok Username" name="socialMediaPlatforms.tiktok" defaultValue={userInformation?.socialMediaPlatforms?.tiktok ? userInformation?.socialMediaPlatforms?.tiktok : null} inputRef={register} />
+                                                        }}
+                                                    />
+                                                </Grid>
+                                                <Grid item>
+                                                    <Button variant="contained" color="secondary" onClick={() => setFilePreview(null)}>Reset</Button>
+                                                </Grid>
+                                            </Grid>
+                                            :
+                                            <StyledDropzone />
+                                        }
+                                    </Grid>
                                 </Grid>
 
-                                <Grid item container direction="row" spacing={3} justify="center" alignItems="center">
-                                    <Button variant="outlined" color="secondary" style={{ marginRight: '8px' }} onClick={() => setEditMode(false)}>Cancel</Button>
-                                    {!saving ?
-                                        <Button variant="contained" color="secondary" type="submit">Save</Button> :
-                                        <Button variant="contained" type="disabled">Saving...</Button>
-                                    }
-                                    {saving ? <LinearProgress color="primary" /> : null}
+                                <Divider orientation="vertical" flexItem />
+
+                                <Grid container item direction="column" xs={6} spacing={2}>
+                                    <Grid item>
+                                        <Typography color="primary" variant="h5" gutterBottom>Key Information</Typography>
+                                    </Grid>
+
+                                    <Grid item>
+                                        <TextField type="text" label="Display Name" name="displayName" defaultValue={userInformation.displayName ? userInformation.displayName : null} inputRef={register} style={{ width: '100%' }} />
+                                    </Grid>
+
+                                    <Grid item>
+                                        <TextField type="text" label='Title / Category' name="category" defaultValue={userInformation.category ? userInformation.category : null} inputRef={register} style={{ width: '100%' }} />
+                                    </Grid>
+
+                                    <Grid item style={{ margin: '8px' }}>
+                                        <InputLabel id="gender-selection-label">Gender</InputLabel>
+                                        <Select
+                                            style={{ width: '50%', }}
+                                            labelId="gender-selection-select"
+                                            id="gender-selection"
+                                            value={gender}
+                                            onChange={handleChangeGender}
+                                            name="gender"
+                                            inputRef={register}
+                                        >
+                                            <MenuItem value={"male"}>Male</MenuItem>
+                                            <MenuItem value={"female"}>Female</MenuItem>
+                                            <MenuItem value={"other"}>Non-Conforming</MenuItem>
+
+                                        </Select>
+
+                                    </Grid>
+
+                                    <Grid item>
+                                        <TextField type="text" label="Your Description" name="description" defaultValue={userInformation.description ? userInformation.description : null} inputRef={register} multiline style={{ width: '90%' }} />
+                                    </Grid>
+                                </Grid>
+
+                                <Divider style={{ width: '100%' }} />
+
+                                <Grid item xs={12}>
+                                    <Typography color="primary" variant="h5" gutterBottom>Social Media Profiles</Typography>
+                                </Grid>
+
+                                {socials.map((social, key) =>
+                                    <Grid item xs={12} sm={6} md={4} key={key}>
+                                        <Paper className={classes.paper}>
+                                            <Grid container direction="row" alignItems="center" justify="center" spacing={2}>
+                                                <Grid item xs={3}>
+                                                    <Avatar src={`/assets/${social}.png`} />
+                                                </Grid>
+
+                                                <Grid item xs={4}>
+                                                    <Typography>{capitalize(social)}</Typography>
+                                                </Grid>
+
+                                                <Divider style={{ width: '100%' }} />
+
+                                                <Grid item >
+                                                    <TextField
+                                                        type="text"
+                                                        style={{ width: '80%' }}
+                                                        label={`${capitalize(social)} Username`}
+                                                        name={`socialMediaPlatforms.${social}`}
+                                                        defaultValue={userInformation?.socialMediaPlatforms?.[social] ?
+                                                            userInformation?.socialMediaPlatforms?.[social]
+                                                            : null}
+                                                        inputRef={register} />
+
+                                                </Grid>
+                                            </Grid>
+                                        </Paper>
+                                    </Grid>
+                                )}
+
+                                <Grid container item direction="row" xs={12} justify="center" alignItems="center" spacing={3}>
+                                    <Grid item>
+                                        <Button variant="outlined" color="secondary" onClick={() => setEditMode(false)}>Cancel</Button>
+                                    </Grid>
+                                    <Grid item>
+                                        {!saving ?
+                                            <Button variant="contained" color="secondary" type="submit">Save</Button> :
+                                            <Button variant="contained" type="disabled">Saving...</Button>
+                                        }
+                                        {saving ? <LinearProgress color="primary" /> : null}
+                                    </Grid>
                                 </Grid>
 
                             </Grid>

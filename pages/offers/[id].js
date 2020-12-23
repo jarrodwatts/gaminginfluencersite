@@ -105,8 +105,16 @@ export default function Offer({ offer, applicants }) {
             let applicantsSubcollection = offerDoc.collection('applicants');
 
             if (!alreadyApplied) { //We're saving them
+
+                console.log("offerid", offer.id);
+
                 applicantsSubcollection.doc(firebaseUserInformation.uid).set(
-                    JSON.parse(JSON.stringify(firebaseUserInformation))
+                    JSON.parse(JSON.stringify(
+                        {
+                            ...firebaseUserInformation,
+                            offerId: offer.id,
+                        }
+                    ))
                 )
                     .then(() => console.log("Success"))
                     .catch((error) => console.log("Error", error))

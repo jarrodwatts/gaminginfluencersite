@@ -24,6 +24,7 @@ import { useRouter } from 'next/router'
 import { useForm } from 'react-hook-form';
 import getUser from '../utils/auth/getUser';
 import { capitalize, displayRegion, capitalizeFirstLetter } from '../utils/helperFunctions/stringFormatting';
+import { socials } from '../utils/helperFunctions/constants';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -75,7 +76,6 @@ export default function Setup() {
 
     if (errors.length > 0) { console.log(errors); }
 
-    const socials = ["twitch", "youtube", "instagram", "twitter", "facebook", "medium"];
     initFirebase();
 
     useEffect(() => {
@@ -106,6 +106,16 @@ export default function Setup() {
             await userDocumentRef.update({
                 type: userType
             });
+
+            // Send verification email
+            let user = firebase.auth().currentUser;
+            user.sendEmailVerification()
+                .then(() => {
+                    // Email sent.
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
             console.log("Document successfully updated!");
             setStage(2)
             // Router.push('/profile')

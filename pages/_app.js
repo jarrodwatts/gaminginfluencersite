@@ -21,8 +21,10 @@ export default function MyApp(props) {
     if (jssStyles) {
       jssStyles.parentElement.removeChild(jssStyles);
     }
+    
     // Within useEffect, request getUser
     // Then, store it in state, and pass it to the UserContext Provider to wrap App
+    initFirebase();
     firebase.auth().onAuthStateChanged(async (user) => {
       const res = await getUser(user);
       setUser(res);

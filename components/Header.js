@@ -10,7 +10,10 @@ import Grid from '@material-ui/core/Grid';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import { useUser } from '../utils/auth/useUser'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/router';
+import firebase from 'firebase/app'
+import 'firebase/auth'
+import initFirebase from '../utils/auth/initFirebase';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -32,10 +35,12 @@ export default function MenuAppBar() {
     const { user, userDocument, logout } = useUser()
     const router = useRouter()
     const [anchorEl, setAnchorEl] = useState(null);
+    const [sentStatus, setSentStatus] = useState(false);
 
     useEffect(() => {
         setUserDetails(userDocument)
         setUsername(userDocument?.displayName)
+
     }, [userDocument]);
 
     const handleClick = (event) => {
@@ -45,6 +50,19 @@ export default function MenuAppBar() {
     const handleClose = () => {
         setAnchorEl(null);
     };
+
+    const handleSend = () => {
+        firebaseUser.sendEmailVerification()
+            .then(() => {
+                setSentStatus(true);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+
+    initFirebase();
+    let firebaseUser = firebase.auth().currentUser;
 
     return (
         <div className={classes.root}>
@@ -98,6 +116,7 @@ export default function MenuAppBar() {
                             >
                                 <MenuItem onClick={() => router.push('/profile')}>Profile</MenuItem>
                                 {userDetails?.type == "Brand" ? <MenuItem onClick={() => router.push('/dashboard')}>Dashboard</MenuItem> : null}
+                                {userDetails?.type == "Influencer" ? <MenuItem onClick={() => router.push('/applications')}>My Applications</MenuItem> : null}
                                 <MenuItem onClick={() => logout()}>Logout</MenuItem>
                             </Menu>
                         </Grid>
@@ -124,6 +143,25 @@ export default function MenuAppBar() {
 
                 </Toolbar>
             </AppBar>
+            {
+                firebaseUser ?
+                    !firebaseUser?.emailVerified ?
+                        <AppBar position="static" style={{ height: '42px', }} color="secondary">
+                            <Grid container direction="row" alignItems="center" justify="center">
+                                <Grid item style={{ marginTop: '4px' }}>
+                                    <Typography gutterBottom>
+                                        Hey, we sent you a verification email. Please take a look 😊!
+                                        {!sentStatus ?
+                                            <Button onClick={() => handleSend()}>Send Again</Button> :
+                                            <b>  Sent!</b>
+                                        }
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+                        </AppBar>
+                        : null
+                    : null
+            }
         </div>
     );
 }
